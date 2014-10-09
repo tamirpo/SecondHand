@@ -1,0 +1,54 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<link rel="stylesheet" href="Scripts/old/jstree/themes/default/style.css" />
+<script src="Scripts/old/jstree/libs/jquery.js"></script>
+<script src="Scripts/old/jstree/jstree.js"></script>
+
+<script src="Scripts/app/management.js"></script>
+
+<div class="hero-unit" style="display:inline-flex;">
+    <ul class="nav nav-pills nav-stacked" >
+        <li class="active"><a href="#">שיוך ביטויים <span class="badge">380</span></a></li>
+        <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                דוחות <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu" role="menu">
+                <li><a id="report1" href="#">דוח מחפשי דירות</a></li>
+                <li><a id="report2" href="#">דוח 2</a></li>
+                <li><a id="report3" href="#">דוח 3</a></li>
+                <li><a id="report4" href="#">דוח 4</a></li>
+            </ul>
+        </li>
+        <li><a href="#">ניהול פרסומות</a></li>
+    </ul>
+</div>
+
+<div id="phraseStudyForm" class="hero-unit" style="display:inline;">
+   <a href="/oldExpressionStudy">לחץ למעבר לשיוך ביטויים</a>
+</div>
+
+<div id="report1Form" class="hero-unit" style="display:none;">
+
+    <span>תאריך התחלה:<input type="date" id="businessReport_startDate" name="startDate" max="2014-09-09"><br>
+    </span>
+
+    <span >תאריך סיום:<input type="date" id="businessReport_endDate" name="endDate" max="2020-09-09"><br>
+    </span>
+
+
+    <button class="btn btn-primary" onclick="generateBusinessReport()">Generate!</button>
+</div>
+
+<div id="report2Form" class="hero-unit" style="display:none;">
+    דוח 2
+</div>
+
+<div id="report3Form" class="hero-unit" style="display:none;">
+    דוח 3
+</div>
+
+<div id="report4Form" class="hero-unit" style="display:none;">
+    דוח 4
+</div>

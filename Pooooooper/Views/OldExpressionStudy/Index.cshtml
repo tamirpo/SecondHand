@@ -1,0 +1,290 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="Scripts/old/jstree/themes/default/style.css" />
+    <script src="Scripts/old/jstree/libs/jquery.js"></script>
+    <script src="Scripts/old/jstree/jstree.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="Content/old/mystyles.css" media="screen" />
+    <script src="Scripts/old/JScript1.js"></script>
+
+
+    <script>
+
+    </script>
+
+</head>
+
+<body style="margin-left: 0px; margin-top: 0px;background-color: #E0E0E0;">
+
+    <input type="hidden" id="postExpressionsVsRootExpressions" value="@ViewBag.PostExpressionsVsRootExpressions" />
+    <input type="hidden" id="postExpressionsVsTypes" value="@ViewBag.PostExpressionsVsTypes" />
+    <input type="hidden" id="rootExpressionIdsVsCategoryIds" value="@ViewBag.RootExpressionIdsVsCategoryIds" />
+    <input type="hidden" id="categoriesVsAddresses" value="@ViewBag.CategoriesVsAddresses" />
+    @if (@ViewBag.PostImplementation != null)
+    {
+        <input type="hidden" id="house" value="@ViewBag.House" />
+        <input type="hidden" id="houseId" value="@ViewBag.PostImplementation.id" />
+        <input type="hidden" id="comment" value="@ViewBag.PostImplementation.Comment" />
+        <input type="hidden" id="streetsComment" value="@ViewBag.PostImplementation.StreetsComment" />
+    }
+    <input type="hidden" id="currentExpression" value="" />
+
+    <div id="loading" style="display:none; position:fixed; background-color: White; opacity:0.7;  width:100%; height:100%;">
+        <p style="margin-left:500px; margin-top:300px;"><img src="Content/loader.gif" /> Please Wait...</p>
+    </div>
+    <table width='100%' border='0'>
+
+        <tr>
+            <td valign="top" style="width: 15%">
+                <div id="container" style="margin-top: 20px;">
+                    <ul class="nav nav-pills nav-stacked" id="categoriesUL"></ul>
+                </div>
+            </td>
+           
+
+            <td valign="top" style="margin-left: 160px;" >
+                <br />
+
+                <div style="min-height: 100px; margin-top: 50px; ">
+                    <div style="margin-left: 150px" id="postWords">
+                        @{
+                            Dictionary<String, String> oneWordExpressions = new Dictionary<string, string>();
+                            Dictionary<String, String> multiWordsExpressions = new Dictionary<string, string>();
+
+                            if (ViewBag.PostImplementation != null)
+                            {
+                                String[] messageWords = ViewBag.PostImplementation.MessageWords;
+                                for (int i = 0; i < messageWords.Length; i++)
+                                {
+                                    if (i % 20 == 0 && i != 0)
+                                    {
+                                        <br />
+                                    }
+
+                                    <div id="word@( i)" value=@messageWords[i] class="divi" onclick='chooseWord(this);' selected="false">@messageWords[i]</div>
+
+                                }
+                            }
+                            else
+                            {
+                                <div style="font-size: 20pt">אין יותר פוסטים</div>
+                            }
+                            System.Web.Script.Serialization.JavaScriptSerializer serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                            string oneWordExpressionsJson = serializer.Serialize((object)oneWordExpressions);
+                            string multiWordsExpressionsJson = serializer.Serialize((object)multiWordsExpressions);
+
+                            <input type="hidden" id="oneWordExpressions" value=@oneWordExpressionsJson />
+                            <input type="hidden" id="multiWordsExpressions" value=@multiWordsExpressionsJson />
+                        }
+
+                    </div>
+
+
+                </div>
+
+                <div id="mm" style="text-align:right; max-width: 300px;  float: left; margin-left: 20px;margin-top: 0px;">
+
+                    <select id="citySelect">
+                        <option value="1">תל אביב</option>
+                        <option value="2">גבעתיים</option>
+                        <option value="3">רמת גן</option>
+                    </select>
+
+                    <div style='font-weight:bold; color: white; cursor: pointer; padding: 2px; display: inline-table; text-align:center; font-size: 15pt; width: 60px; background-color: rgb(55, 68, 136);' id='saveButton' onclick="savePostExpressions();">
+                        הבא
+                    </div>&nbsp&nbsp<div style='font-weight:bold;color: white; cursor: pointer; margin-left:10px;padding: 2px; display: inline-table; text-align:center; font-size: 15pt;width: 60px; background-color: rgb(55, 68, 136);' id='addButton' onclick="addExpression();">
+                        הוסף
+                    </div>&nbsp&nbsp<div style='font-weight:bold;color: white; cursor: pointer; margin-left:10px;padding: 2px; text-align:center; display: inline-table; font-size: 15pt;width: 60px; background-color: rgb(60, 68, 68);' id='addBugButton' onclick="addBug();">
+                        באג
+                    </div>
+                    <br />
+                    <textarea style="direction:rtl; margin-left: 80px" cols="20" rows="2" id="bugComment"></textarea>
+
+
+                </div>
+                <div style="margin-left: 380px;">
+                    <span style="vertical-align:top; margin-left:200px; font-size:15pt;text-decoration:underline;">סיכום שיוך 84%</span><br />
+
+                    <table id="types" border=0 style="width: 100%">
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration:underline">סוג חיפוש</span></td>
+                            <td align=right><span style="color: Red" id="purposeSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline;">עיר</span></td>
+                            <td align=right><span style="color: Red" id="citySpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline; ">תת איזור</span></td>
+                            <td align=right><span style="color: Red" id="subAreaSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline; ">לוקיישן</span></td>
+                            <td align=right><span style="color: Red" id="locationSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline;">רחוב</span></td>
+                            <td align=right><span style="color: Red" id="streetSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline; ">מספר חדרים</span></td>
+                            <td align=right><span style="color: Red" id="roomsNumberSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline;">קומה</span></td>
+                            <td align=right><span style="color: Red" id="floorSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline;">מס' שותפים סהכ</span></td>
+                            <td align=right><span style="color: Red" id="totalRoommatesSpan">x</span></td>
+                            
+                        </tr>
+                        <tr>
+                            <td align=right style="width:30%"><span style="text-decoration: underline;">צד</span></td>
+                            <td align=right><span style="color: Red" id="sideSpan">x</span></td>
+                            
+                        </tr>
+
+                        <tr>
+                            <td colspan="2">
+                                <table style="width:100%">
+                                    <tr>
+                                        <td align=right><span style="text-decoration:underline">מצב</span></td>
+                                        <td align=right><span style="color: Red" id="renovatedSpan">x</span></td>
+
+                                        <td align=right><span style="text-decoration:underline;margin-right:30%">סוג בית</span></td>
+                                        <td align=right><span style="color: Red" id="typeSpan">x</span></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td align=right><span style="text-decoration:underline">חניה</span></td>
+                                        <td align=right><span style="color: Red" id="parkingSpan">x</span></td>
+
+                                        <td align=right><span style="text-decoration: underline; margin-right: 30%; ">מחיר</span></td>
+                                        <td align=right><span style="color: Red" id="priceSpan">x</span></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td align=right><span style="text-decoration:underline">גודל</span></td>
+                                        <td align=right><span style="color: Red" id="sizeSpan">x</span></td>
+
+                                        <td align=right><span style="text-decoration: underline; margin-right: 30%; ">בעלי חיים</span></td>
+                                        <td align=right><span style="color: Red" id="petsSpan">x</span></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td align=right><span style="text-decoration:underline">מעלית</span></td>
+                                        <td align=right><span style="color: Red" id="elevatorSpan">x</span></td>
+
+                                        <td align=right><span style="text-decoration: underline; margin-right: 30%; ">עישון</span></td>
+                                        <td align=right><span style="color: Red" id="smokeSpan">x</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td align=right><span style="text-decoration:underline">מרוהטת</span></td>
+                                        <td align=right><span style="color: Red" id="furnituredSpan">x</span></td>
+
+                                        <td align=right><span style="text-decoration: underline; margin-right: 30%; ">מרפסת</span></td>
+                                        <td align=right><span style="color: Red" id="balconySpan">x</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td align=right><span style="text-decoration:underline">סאבלט</span></td>
+                                        <td align=right><span style="color: Red" id="subletSpan">x</span></td>
+
+                                        <td align=right><span style="text-decoration: underline; margin-right: 30%; ">מתיווך</span></td>
+                                        <td align=right><span style="color: Red" id="fromAgencySpan">x</span></td>
+
+                                    </tr>
+                                    </tr>
+                                    <tr>
+                                        <td  colspan=1 align="right">
+                                            <span style="text-decoration:underline">מס טלפון</span>
+                                        </td>
+                                        <td colspan=3 align="right">
+                                            <span style="color: Red" id="phoneNumberSpan">x</span>
+                                        </td>
+                                    </tr>
+
+                                </table>
+
+
+                            </td>
+                          
+                        </tr>
+                       
+                    </table>
+
+
+                </div>
+            </td>
+
+            <td align='right' valign=top style='padding-right:5px;border-right-width: 1px; border-right-style: solid;'>
+                <!--
+        :ביטויים
+
+        <div id='phrasesResults' style='min-height: 300px; font-size: 10px;'>
+
+
+
+
+            @if (@ViewBag.PostImplementation != null)
+            {
+                int j = 1;
+                foreach (String expression in @ViewBag.PostImplementation.ExpressionsVsRootExpressions.Keys)
+                {
+                    <div id='expression@( j)' style='display: block;'>
+                     @( @ViewBag.PostImplementation.ExpressionsVsRootExpressions[expression] + " : " + expression)</div>
+
+                 j++;
+                }
+            }
+            </div>-->
+                <div>:משפט מקורי</div>
+                @if (@ViewBag.PostImplementation != null)
+                {
+                    <div style='margin-top:50px;text-align: right;width: 150px;font-size: 8pt;' id='originalMessage'>@ViewBag.PostImplementation.Message</div>
+
+
+                    <div style='text-align: right;font-size: 8pt;' id='l1'>רחובות בפוסט:</div>
+                    <div style='text-align: right;font-size: 8pt;' id='streets_found'>@ViewBag.PostImplementation.StreetsFound</div>
+
+                    <div style='text-align: right;font-size: 8pt;' id='l1'>לוקיישנים בפוסט:</div>
+                    <div style='text-align: right;font-size: 8pt;' id='locations_found'>@ViewBag.PostImplementation.LocationsFound</div>
+
+                    <div style='text-align: right;font-size: 8pt;' id='l1'>שכונות בפוסט:</div>
+                    <div style='text-align: right;font-size: 8pt;' id='neighborhoods_found'>@ViewBag.PostImplementation.NeighborhoodsFound</div>
+
+                    <div style='text-align: right;font-size: 8pt;' id='l1'>תתי איזורים בפוסט:</div>
+                    <div style='text-align: right;font-size: 8pt;' id='subareas_found'>@ViewBag.PostImplementation.SubAreasFound</div>
+
+                    <div style='text-align: right;font-size: 8pt;' id='l1'>איזורים בפוסט:</div>
+                    <div style='text-align: right;font-size: 8pt;' id='areas_found'>@ViewBag.PostImplementation.AreasFound</div>
+                }
+                
+                <div style="margin-top:50px ;">
+
+                    :הערות
+                    <br />
+                    <span id="commentSpan" style="font-size: 9pt;"></span>
+
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+
+</body>
+</html>
