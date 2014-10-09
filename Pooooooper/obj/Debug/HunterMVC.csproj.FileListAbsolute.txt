@@ -185,3 +185,4 @@ C:\Users\Tamir\HunterMVC\Pooooooper\bin\zh-Hans\System.Spatial.resources.dll
 C:\Users\Tamir\HunterMVC\Pooooooper\bin\zh-Hant\System.Spatial.resources.dll
 C:\Users\Tamir\HunterMVC\Pooooooper\obj\Debug\Pooooooper.dll
 C:\Users\Tamir\HunterMVC\Pooooooper\obj\Debug\Pooooooper.pdb
+C:\Users\Tamir\HunterMVC\Pooooooper\obj\Debug\HunterMVC.csprojResolveAssemblyReference.cache

@@ -2193,26 +2193,29 @@ namespace HunterMVC
                 }
 
 
-                command.CommandText = @"select * from houseaddressconclusions where id in (
+                command.CommandText = @"select * 
+                                        from houseaddressconclusions 
+                                        where id in (
 	                                        select id
 	                                        from houseAddressConclusions 
-	                                        where id in (select distinct id
-	                                        from houseAddressConclusions
-	                                        where objectType=@ObjectType
-	                                        and objectId in (" + inArray + @"))
+	                                        where id in (
+                                                select distinct id
+	                                            from houseAddressConclusions
+	                                            where objectType=@ObjectType
+	                                            and objectId in (" + inArray + @"))
 	                                        group by id
-	                                        having count(distinct objectId) <=" + objectIds.Length + @")
-                                        except
-	                                        select * from houseaddressconclusions where id in (
+	                                        having count(distinct objectId) <=" + objectIds.Length + @"
+                                            except
+	                                        select id from houseaddressconclusions where id in (
 		                                        select id
 		                                        from houseAddressConclusions 
 		                                        where id in (select distinct id
 		                                        from houseAddressConclusions
 		                                        where objectType=@ObjectType
 		                                        and objectId in (" + inArray + @"))
-		                                        group by id
-		                                        having count(distinct objectId) <=" + objectIds.Length + @")
-	                                        and objectid not in (" + inArray + @")";
+		                                    group by id
+		                                    having count(distinct objectId) <=" + objectIds.Length + @")
+	                                        and objectid not in (" + inArray + @"))";
               
                 command.CommandType = CommandType.Text;
                 command.Parameters.Add("@ObjectType", SqlDbType.NVarChar);
