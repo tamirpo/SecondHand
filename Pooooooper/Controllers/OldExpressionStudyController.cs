@@ -28,20 +28,23 @@ namespace HunterMVC.Controllers
                 HunterBL bl = new HunterBL();
 
                 House house = bl.GetNewHouse(1);
-
-                Dictionary<string, string> rootExpressionIdsVsCategoryIds = bl.GetRootExpressionsIdsVsCategoriesIds(house.CityId);
-                Dictionary<string, List<string>> categoriesVsAddresses = bl.GetCategoriesIdsVsAddressesIds(house.CityId);
-
-                JavaScriptSerializer serializer = new JavaScriptSerializer();
-                ViewBag.RootExpressionIdsVsCategoryIds = serializer.Serialize((object)rootExpressionIdsVsCategoryIds);
-                ViewBag.CategoriesVsAddresses = serializer.Serialize((object)categoriesVsAddresses);
                 if (house != null)
                 {
-                    ViewBag.PostExpressionsVsTypes = serializer.Serialize((object)house.ExpressionsVsTypes);
-                    ViewBag.PostImplementation = house;
+                    Dictionary<string, string> rootExpressionIdsVsCategoryIds = bl.GetRootExpressionsIdsVsCategoriesIds(house.CityId);
+                    Dictionary<string, List<string>> categoriesVsAddresses = bl.GetCategoriesIdsVsAddressesIds(house.CityId);
 
-                    ViewBag.House = serializer.Serialize(house);
+                    JavaScriptSerializer serializer = new JavaScriptSerializer();
+                    ViewBag.RootExpressionIdsVsCategoryIds = serializer.Serialize((object)rootExpressionIdsVsCategoryIds);
+                    ViewBag.CategoriesVsAddresses = serializer.Serialize((object)categoriesVsAddresses);
+                    if (house != null)
+                    {
+                        ViewBag.PostExpressionsVsTypes = serializer.Serialize((object)house.ExpressionsVsTypes);
+                        ViewBag.PostImplementation = house;
+
+                        ViewBag.House = serializer.Serialize(house);
+                    }
                 }
+                
                 return View();
             }
         }
