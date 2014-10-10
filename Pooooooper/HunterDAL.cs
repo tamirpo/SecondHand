@@ -103,6 +103,11 @@ namespace HunterMVC
                                     (select top 1 * from posts where verified = 0 and id in (select postId from houses where cityid=@CityId) order by datecreated desc) p
                                     where h.postId = p.id ";
 
+            /*command.CommandText = @"Select h.*, p.*
+                                    from houses h,
+                                    posts p
+                                    where h.postId = p.id and h.postid=64865 ";*/
+
             command.CommandType = CommandType.Text;
             command.Parameters.Add("@CityId", SqlDbType.Int);
             command.Parameters["@CityId"].Value = cityId;

@@ -48,8 +48,7 @@ namespace HunterMVC
                 }
                 if (returnedHouse.Floor > 0)
                 {
-                    string rootExpression = GetRootExpressionNameFromRootExpressionId(returnedHouse.Floor);
-                    returnedHouse.ExpressionsVsTypes.Add(rootExpression, "קומה");
+                    returnedHouse.ExpressionsVsTypes.Add(" קומה " + returnedHouse.Floor, "קומה");
                 }
                 if (returnedHouse.ParkingId > 0)
                 {

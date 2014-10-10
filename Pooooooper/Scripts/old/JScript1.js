@@ -344,21 +344,25 @@ function fillCategoriesTreeAndSummary() {
         }
         
 
-        for (var categoryId in categoriesVsAddresses) {
+        /*for (var categoryId in categoriesVsAddresses) {
+
             var currentCategoryUl = document.getElementById("category" + categoryId);
-            var rootExpressionLi = document.createElement('li');
-            rootExpressionLi.id = "root_" + categoriesVsAddresses[categoryId];
-            rootExpressionLi.setAttribute('name', allRootExpressions[rootId]);
-            var span = document.createElement('a');
-            span.innerHTML = allRootExpressions[rootId];
-            span.setAttribute('name', allRootExpressions[rootId]);
-            //span.href = "#"
-            rootExpressionLi.appendChild(span);
-            currentCategoryUl.appendChild(rootExpressionLi);
+            for (var currentAddress in categoriesVsAddresses[categoryId]) {
+                
+                var rootExpressionLi = document.createElement('li');
+                rootExpressionLi.id = "root_" + categoriesVsAddresses[categoryId][currentAddress];
+                rootExpressionLi.setAttribute('name', allRootExpressions[rootId]);
 
-            rootExpressionsStringVsCategoryString[allRootExpressions[rootId]] = currentCategoryUl.getAttribute("name");
+                /*var span = document.createElement('a');
+                span.innerHTML = allRootExpressions[rootId];
+                span.setAttribute('name', allRootExpressions[rootId]);
+                
+                rootExpressionLi.appendChild(span);
+                currentCategoryUl.appendChild(rootExpressionLi);
 
-        }
+                rootExpressionsStringVsCategoryString[allRootExpressions[rootId]] = currentCategoryUl.getAttribute("name");
+            }
+        }*/
 
         for (var rootId in rootExpressionIdsVsCategoryIds) {
             var currentCategoryUl = document.getElementById("category" + rootExpressionIdsVsCategoryIds[rootId]);
