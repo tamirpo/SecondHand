@@ -10,5 +10,7 @@ namespace HunterMVC.Models
         public string Sender { get; set; }
         public string PostText { get; set; }
         public DateTime DateCreated { get; set; }
+
+        public string City { get; set; }
     }
 }

@@ -7,48 +7,217 @@
 
 <script src="Scripts/app/management.js"></script>
 
-<div class="hero-unit" style="display:inline-flex;">
-    <ul class="nav nav-pills nav-stacked" >
-        <li class="active"><a href="#">מנוע <span class="badge">380</span></a></li>
-        <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                דוחות <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu">
-                <li><a id="report1" href="#">דוח מחפשי דירות</a></li>
-                <li><a id="report2" href="#">דוח 2</a></li>
-                <li><a id="report3" href="#">דוח 3</a></li>
-                <li><a id="report4" href="#">דוח 4</a></li>
-            </ul>
-        </li>
-        <li><a href="#">ניהול פרסומות</a></li>
-    </ul>
-</div>
+<input type="hidden" id="areasVsSubAreas" value="" />
+<input type="hidden" id="areasVsLocations" value="" />
+<input type="hidden" id="areaIdVsName" value="" />
+<input type="hidden" id="subAreaIdVsName" value="" />
+<input type="hidden" id="locationIdVsName" value="" />
 
-<div id="phraseStudyForm" class="hero-unit" style="display:inline;">
-   <a href="/oldExpressionStudy">לחץ למעבר למנוע</a>
-</div>
+<div style="">
+    <div class="hero-unit" style="display:inline-flex;">
+        <ul class="nav nav-pills nav-stacked">
+            <li class="active"><a href="#">מנוע <span class="badge">380</span></a></li>
+            <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    דוחות <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a id="apartmentSearchPostsReport" href="#">דוח פירוט מחפשי דירות</a></li>
+                    <li><a id="agentsPostsReport" href="#">דוח פירוט מודעות תיווך</a></li>
+                    <li><a id="totalPostsReport" href="#">דוח כמות מודעות</a></li>
+                    <li><a id="totalApartmentSearchPostsReport" href="#">דוח כמות מחפשי דירות</a></li>
+                    <li><a id="apartmentsDetailsReport" href="#">דוח פירוט מודעות</a></li>
+                </ul>
+            </li>
+            <li><a href="#">ניהול פרסומות</a></li>
+        </ul>
+    </div>
 
-<div id="report1Form" class="hero-unit" style="display:none;">
+    <div id="reportsForms" style="display:inline-flex;width:70%">
+        <div id="phraseStudyForm" class="hero-unit" style="display:inline;">
+            <a href="/oldExpressionStudy">לחץ למעבר למנוע</a>
+        </div>
 
-    <span>תאריך התחלה:<input type="date" id="businessReport_startDate" name="startDate" max="2014-09-09"><br>
-    </span>
+        <div id="apartmentSearchPostsReportForm" class="hero-unit" style="display:none;">
 
-    <span >תאריך סיום:<input type="date" id="businessReport_endDate" name="endDate" max="2020-09-09"><br>
-    </span>
+            <span>
+                תאריך התחלה:<input type="date" id="apartmentSearchPostsReport_startDate" name="startDate" max="2014-09-09"><br>
+            </span>
 
+            <span>
+                תאריך סיום:<input type="date" id="apartmentSearchPostsReport_endDate" name="endDate" max="2020-09-09"><br>
+            </span>
 
-    <button class="btn btn-primary" onclick="generateBusinessReport()">Generate!</button>
-</div>
+            <button class="btn btn-primary" onclick="generateApartmentSearchPostsReport()">Generate!</button>
+        </div>
 
-<div id="report2Form" class="hero-unit" style="display:none;">
-    דוח 2
-</div>
+        <div id="AgentsPostsReportForm" class="hero-unit" style="display:none;">
+            <span>
+                תאריך התחלה:<input type="date" id="AgentsPostsReport_startDate" name="startDate" max="2014-09-09"><br>
+            </span>
 
-<div id="report3Form" class="hero-unit" style="display:none;">
-    דוח 3
-</div>
+            <span>
+                תאריך סיום:<input type="date" id="AgentsPostsReport_endDate" name="endDate" max="2020-09-09"><br>
+            </span>
 
-<div id="report4Form" class="hero-unit" style="display:none;">
-    דוח 4
+            <select id="AgentsPostsCitySelect">
+                <option value="1">תל אביב</option>
+                <option value="2">גבעתיים</option>
+                <option value="3">רמת גן</option>
+            </select>
+
+            <button class="btn btn-primary" onclick="generateAgentsPostsReport()">Generate!</button>
+        </div>
+
+        <div id="totalPostsReportForm" class="hero-unit" style="display:none;">
+            <span>
+                תאריך התחלה:<input type="date" id="totalPostsReport_startDate" name="startDate" max="2014-09-09"><br>
+            </span>
+
+            <span>
+                תאריך סיום:<input type="date" id="totalPostsReport_endDate" name="endDate" max="2020-09-09"><br>
+            </span>
+
+            <select id="totalPostsCitySelect">
+                <option value="1">תל אביב</option>
+                <option value="2">גבעתיים</option>
+                <option value="3">רמת גן</option>
+            </select>
+
+            <button class="btn btn-primary" onclick="generateTotalPostsReport()">Generate!</button>
+        </div>
+
+        <div id="totalApartmentSearchPostsReportForm" class="hero-unit" style="display:none;">
+            <span>
+                תאריך התחלה:<input type="date" id="totalApartmentSearchPostsReport_startDate" name="startDate" max="2014-09-09"><br>
+            </span>
+
+            <span>
+                תאריך סיום:<input type="date" id="totalApartmentSearchPostsReport_endDate" name="endDate" max="2020-09-09"><br>
+            </span>
+
+            <select id="totalApartmentSearchPostsCitySelect">
+                <option value="1">תל אביב</option>
+                <option value="2">גבעתיים</option>
+                <option value="3">רמת גן</option>
+            </select>
+
+            <button class="btn btn-primary" onclick="generateTotalApartmentSearchPostsReport()">Generate!</button>
+        </div>
+
+        <div id="apartmentsDetailsReportForm" class="hero-unit" style="display:none;">
+
+            <div style="display:inline-flex">
+                <span>
+                    תאריך התחלה:<input type="date" id="apartmentsDetailsReport_startDate" name="startDate" min="2014-09-09"><br>
+                </span>
+
+                <span>
+                    תאריך סיום:<input type="date" id="apartmentsDetailsReport_endDate" name="endDate" max="2020-09-09"><br>
+                </span>
+            </div>
+
+            <div style="display:inline-flex">
+
+                <label for="apartmentsDetailsCitySelect">עיר</label>
+                <select id="apartmentsDetailsCitySelect" onchange="onApartmentsDetailsCitySelect()">
+                    <option value="0">בחר</option>
+                    <option value="1">תל אביב</option>
+                    <option value="2">גבעתיים</option>
+                    <option value="3">רמת גן</option>
+                </select>
+
+                <label for="apartmentsDetailsAreaSelect">איזור</label>
+                <select id="apartmentsDetailsAreaSelect" onchange="onApartmentsDetailsAreaSelect()">
+                    <option value="0">בחר</option>
+                </select>
+            </div>
+            <div style="display:inline-flex">
+                <label for="apartmentsDetailsSubAreaSelect">תת איזור</label>
+                <select id="apartmentsDetailsSubAreaSelect">
+                    <option value="0">בחר</option>
+                </select>
+
+                <label for="apartmentsDetailsLocationSelect">לוקיישן</label>
+                <select id="apartmentsDetailsLocationSelect">
+                    <option value="0">בחר</option>
+                </select>
+            </div>
+            <div style="display:inline-flex">
+                <label for="apartmentsDetailsPurposeSelect">סוג חיפוש</label>
+                <select id="apartmentsDetailsPurposeSelect">
+                    <option value="19">דירה ריקה</option>
+                    <option value="20">שותפים</option>
+                </select>
+            </div>
+            <div style="display:inline-flex">
+                    <label for="fromPrice">ממחיר</label>
+                    <input type="text" id="fromPrice" />
+
+                    <label for="toPrice">עד מחיר</label>
+                    <input type="text" id="toPrice" />
+                </div>
+                <div style="display:inline-flex">
+                    <label for="fromRoomsNumber">מחדרים</label>
+                    <input type="text" id="fromRoomsNumber" />
+
+                    <label for="toRoomsNumber">עד חדרים</label>
+                    <input type="text" id="toRoomsNumber" />
+                </div>
+                <div style="display:inline-flex">
+                    <label for="fromRoomatesNumber">משותפים</label>
+                    <input type="text" id="fromRoomatesNumber" />
+
+                    <label for="toRoommatesNumber">עד שותפים</label>
+                    <input type="text" id="toRoommatesNumber" />
+                </div>
+                <div style="display:inline-flex">
+                    <label for="fromSize">מגודל</label>
+                    <input type="text" id="fromSize" />
+
+                    <label for="toSize">עד גודל</label>
+                    <input type="text" id="toSize" />
+                </div>
+                <div style="display: inline-flex;width:50%">
+                    <input type="radio" id="yesSubletRadio">
+                    <label for="yesSubletRadio">כן סאבלט</label>
+                    <input type="radio" id="noSubletRadio">
+                    <label for="noSubletRadio">לא סאבלט</label>
+                </div>
+                <div style="display: inline-flex;width:50%">
+                    <input type="radio" id="yesFromAgencyRadio">
+                    <label for="yesFromAgencyRadio">כן מתיווך</label>
+                    <input type="radio" id="noFromAgencyRadio">
+                    <label for="noFromAgencyRadio">לא מתיווך</label>
+                </div>
+                <div style="display:inline-flex">
+
+                    <input type="checkbox" id="furnituredCheckbox">
+                    <label for="furnituredCheckbox">מרוהטת</label>
+
+                    <input type="checkbox" id="renovatedCheckbox" style="margin-right:10px">
+                    <label for="renovatedCheckbox">משופצת</label>
+
+                    <input type="checkbox" id="elevatorCheckbox" style="margin-right:10px">
+                    <label for="elevatorCheckbox">מעלית</label>
+
+                    <input type="checkbox" id="balconyCheckbox" style="margin-right:10px">
+                    <label for="balconyCheckbox">מרפסת</label>
+
+                    <input type="checkbox" id="smokeCheckbox" style="margin-right:10px">
+                    <label for="smokeCheckbox">ללא עישון</label>
+
+                    <input type="checkbox" id="petsCheckbox" style="margin-right:10px">
+                    <label for="petsCheckbox">ללא בעח</label>
+
+                    <input type="checkbox" id="parkingCheckbox" style="margin-right:10px">
+                    <label for="parkingCheckbox">חניה</label>
+                </div>
+
+                <br />
+                <button class="btn btn-primary" onclick="generateApartmentsDetailsReport()">Generate!</button>
+
+                <hr />
+            </div>
+    </div>
 </div>

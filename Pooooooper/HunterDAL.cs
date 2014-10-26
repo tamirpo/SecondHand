@@ -21,6 +21,7 @@ namespace HunterMVC
         String subAreasTableNameTelAviv = "subAreas";
         String locationsAliasesTableNameTelAviv = "locationsAliases";
         String locationsTableNameTelAviv = "locations";
+        String locationsToNeighborhoodsTableNameTelAviv = "locations_streets_neighborhoods";
 
         String streetsTableNameRamatGan = "streetsRamatGan";
         String streetsAliasesTableNameRamatGan = "streetsRamatGanAliases";
@@ -31,6 +32,7 @@ namespace HunterMVC
         String locationsAliasesTableNameRamatGan = "locationsRamatGanAliases";
         String locationsTableNameRamatGan = "locationsRamatGan";
         String subAreasTableNameRamatGan = "subAreasRamatGan";
+        String locationsToNeighborhoodsTableNameRamatGan = "locations_streets_neighborhoodsRamatGan";
 
         String streetsTableNameGivataim = "streetsGivataim";
         String streetsAliasesTableNameGivataim = "streetsGivataimAliases";
@@ -41,6 +43,7 @@ namespace HunterMVC
         String locationsAliasesTableNameGivataim = "locationsGivataimAliases";
         String locationsTableNameGivataim = "locationsGivataim";
         String subAreasTableNameGivataim = "subAreasGivataim";
+        String locationsToNeighborhoodsTableNameGivataim = "locations_streets_neighborhoodsGivataim";
 
         SqlConnection connection;
         public HunterDAL()
@@ -252,6 +255,21 @@ namespace HunterMVC
                     return streetsAliasesTableNameRamatGan;
                 default:
                     return streetsAliasesTableNameTelAviv;
+            }
+        }
+
+        internal string GetLocationsToNeighborhoodsTableName(int cityId)
+        {
+            switch (cityId)
+            {
+                case (int)City.TelAviv:
+                    return locationsToNeighborhoodsTableNameTelAviv;
+                case (int)City.Givataim:
+                    return locationsToNeighborhoodsTableNameGivataim;
+                case (int)City.RamatGan:
+                    return locationsToNeighborhoodsTableNameRamatGan;
+                default:
+                    return locationsToNeighborhoodsTableNameTelAviv;
             }
         }
 
@@ -1337,7 +1355,12 @@ namespace HunterMVC
             connection.Close();
         }
 
-        internal List<House> GetApartments(UserSearch userSearch, DateTime lastGrabDate)
+        internal List<House> GetApartments(UserSearch userSearch, DateTime startDate)
+        {
+            return GetApartments(userSearch, startDate, DateTime.MaxValue);
+        }
+
+        internal List<House> GetApartments(UserSearch userSearch, DateTime startDate, DateTime endDate)
         {
             List<House> result = new List<House>();
 
@@ -1345,24 +1368,19 @@ namespace HunterMVC
 
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
-            String query = @"Select * from housesFiltered h, posts p where h.postId = p.id and purposeId = @PurposeId and h.dateCreated>@lastGrabDate ";
+            String query = @"Select * 
+                            from housesFiltered h, posts p 
+                            where h.postId = p.id and purposeId = @PurposeId 
+                            and (h.dateCreated between @startDate and @endDate) ";
 
             command.Parameters.Add("@PurposeId", SqlDbType.Int);
             command.Parameters["@PurposeId"].Value = userSearch.Purpose;
 
-            command.Parameters.Add("@lastGrabDate", SqlDbType.DateTime);
-            command.Parameters["@lastGrabDate"].Value = lastGrabDate;
+            command.Parameters.Add("@startDate", SqlDbType.DateTime);
+            command.Parameters["@startDate"].Value = startDate;
 
-            /*string inArray = String.Empty;
-            foreach (string currentId in userSearch.AddressConclusionIds)
-            {
-                inArray += "'" + currentId + "',"; 
-            }
-            inArray = inArray.Substring(0, inArray.Length - 1);
-            if (!String.IsNullOrEmpty(inArray))
-            {
-                query += " and h.addressConclusionId in (" + inArray + ")";
-            }*/
+            command.Parameters.Add("@endDate", SqlDbType.DateTime);
+            command.Parameters["@endDate"].Value = endDate;
 
             if (userSearch.FromSize > 0)
             {
@@ -1385,9 +1403,9 @@ namespace HunterMVC
             if (userSearch.FromRoomsNumber > 0)
             {
                 query += " and ((roomsNumber between @FromRoomsNumber and @ToRoomsNumber) or roomsNumber=0) ";
-                command.Parameters.Add("@FromRoomsNumber", SqlDbType.Int);
+                command.Parameters.Add("@FromRoomsNumber", SqlDbType.Decimal);
                 command.Parameters["@FromRoomsNumber"].Value = userSearch.FromRoomsNumber;
-                command.Parameters.Add("@ToRoomsNumber", SqlDbType.Int);
+                command.Parameters.Add("@ToRoomsNumber", SqlDbType.Decimal);
                 command.Parameters["@ToRoomsNumber"].Value = userSearch.ToRoomsNumber;
             }
 
@@ -1534,6 +1552,181 @@ namespace HunterMVC
 
             return result;
         }
+
+        internal List<HouseNames> GetApartmentsExact(UserSearch userSearch, DateTime startDate, DateTime endDate)
+        {
+            List<HouseNames> result = new List<HouseNames>();
+
+            connection.Open();
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            String query = @"Select * 
+                            from v_filtered_houses_names h, posts p 
+                            where h.postId = p.id and purposeId = @PurposeId 
+                            and (h.dateCreated between @startDate and @endDate) ";
+
+            command.Parameters.Add("@PurposeId", SqlDbType.Int);
+            command.Parameters["@PurposeId"].Value = userSearch.Purpose;
+
+            command.Parameters.Add("@startDate", SqlDbType.DateTime);
+            command.Parameters["@startDate"].Value = startDate;
+
+            command.Parameters.Add("@endDate", SqlDbType.DateTime);
+            command.Parameters["@endDate"].Value = endDate;
+
+            if (userSearch.FromSize > 0)
+            {
+                query += " and (size between @FromSize and @ToSize) ";
+                command.Parameters.Add("@FromSize", SqlDbType.Int);
+                command.Parameters["@FromSize"].Value = userSearch.FromSize;
+                command.Parameters.Add("@ToSize", SqlDbType.Int);
+                command.Parameters["@ToSize"].Value = userSearch.ToSize;
+            }
+
+            if (userSearch.FromPrice > 0)
+            {
+                query += " and (price between @FromPrice and @ToPrice) ";
+                command.Parameters.Add("@FromPrice", SqlDbType.Int);
+                command.Parameters["@FromPrice"].Value = userSearch.FromPrice;
+                command.Parameters.Add("@ToPrice", SqlDbType.Int);
+                command.Parameters["@ToPrice"].Value = userSearch.ToPrice;
+            }
+
+            if (userSearch.FromRoomsNumber > 0)
+            {
+                query += " and (roomsNumber between @FromRoomsNumber and @ToRoomsNumber) ";
+                command.Parameters.Add("@FromRoomsNumber", SqlDbType.Decimal);
+                command.Parameters["@FromRoomsNumber"].Value = userSearch.FromRoomsNumber;
+                command.Parameters.Add("@ToRoomsNumber", SqlDbType.Decimal);
+                command.Parameters["@ToRoomsNumber"].Value = userSearch.ToRoomsNumber;
+            }
+
+            if (userSearch.FromTotalRoommatesNumber > 0)
+            {
+                query += " and (totalRoommatesNumber between @FromTotalRoommatesNumber and @ToTotalRoommatesNumber) ";
+                command.Parameters.Add("@FromTotalRoommatesNumber", SqlDbType.Int);
+                command.Parameters["@FromTotalRoommatesNumber"].Value = userSearch.FromTotalRoommatesNumber;
+                command.Parameters.Add("@ToTotalRoommatesNumber", SqlDbType.Int);
+                command.Parameters["@ToTotalRoommatesNumber"].Value = userSearch.ToTotalRoommatesNumber;
+            }
+
+            if (userSearch.Balcony > 0)
+            {
+                query += " and balconyId = @BalconyId ";
+                command.Parameters.Add("@BalconyId", SqlDbType.Int);
+                command.Parameters["@BalconyId"].Value = userSearch.Balcony;
+            }
+            if (userSearch.Furnitured > 0)
+            {
+                query += " and FurnituredId = @FurnituredId ";
+                command.Parameters.Add("@FurnituredId", SqlDbType.Int);
+                command.Parameters["@FurnituredId"].Value = userSearch.Furnitured;
+            }
+            if (userSearch.Renovated > 0)
+            {
+                query += " and RenovatedId = @RenovatedId ";
+                command.Parameters.Add("@RenovatedId", SqlDbType.Int);
+                command.Parameters["@RenovatedId"].Value = userSearch.Renovated;
+            }
+            if (userSearch.Pets > 0)
+            {
+                query += " and PetsId in (@PetsId,0) ";
+                command.Parameters.Add("@PetsId", SqlDbType.Int);
+                command.Parameters["@PetsId"].Value = userSearch.Pets;
+            }
+            if (userSearch.Parking > 0)
+            {
+                query += " and ParkingId = @ParkingId ";
+                command.Parameters.Add("@ParkingId", SqlDbType.Int);
+                command.Parameters["@ParkingId"].Value = userSearch.Parking;
+            }
+            if (userSearch.Smoke > 0)
+            {
+                query += " and SmokeId = @SmokeId ";
+                command.Parameters.Add("@SmokeId", SqlDbType.Int);
+                command.Parameters["@SmokeId"].Value = userSearch.Smoke;
+            }
+            if (userSearch.FromAgency > (int)FromAgencyOptions.NONE)
+            {
+                if (userSearch.FromAgency == (int)FromAgencyOptions.NoFromAgency)
+                {
+                    query += " and FromAgencyId in (@FromAgencyId,0) ";
+                }
+                else
+                {
+                    query += " and FromAgencyId = @FromAgencyId ";
+                }
+                
+                command.Parameters.Add("@FromAgencyId", SqlDbType.Int);
+                command.Parameters["@FromAgencyId"].Value = userSearch.FromAgency;
+            }
+            if (userSearch.Sublet > (int)SubletOptions.NONE)
+            {
+                if (userSearch.Sublet == (int)SubletOptions.NoSublet)
+                {
+                    query += " and SubletId in (@SubletId,0) ";
+                }
+                else
+                {
+                    query += " and SubletId = @SubletId ";
+                }
+
+                command.Parameters.Add("@SubletId", SqlDbType.Int);
+                command.Parameters["@SubletId"].Value = userSearch.FromAgency;
+            }
+            if (userSearch.City > 0)
+            {
+                query += " and CityId = @CityId ";
+                command.Parameters.Add("@CityId", SqlDbType.Int);
+                command.Parameters["@CityId"].Value = userSearch.City;
+            }
+
+            command.CommandText = query;
+            command.CommandType = CommandType.Text;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                HouseNames house = new HouseNames();
+
+                house.PostId = (int)reader["postId"];
+                house.City = reader["city"].ToString();
+                house.RoomsNumber = Double.Parse(reader["roomsnumber"].ToString());
+                house.RoommatesNumber = (int)reader["totalRoommatesnumber"];
+                house.Side = reader["side"].ToString();
+                house.Parking = reader["parking"].ToString();
+                house.Renovated = reader["renovated"].ToString();
+                house.Purpose = reader["purpose"].ToString();
+                house.Floor = (int)reader["floor"];
+                house.Type = reader["type"].ToString();
+                house.id = (int)reader["id"];
+                house.Size = (int)reader["size"];
+                house.Price = (int)reader["price"];
+                house.Smoke = reader["smoke"].ToString();
+                house.Pets = reader["pets"].ToString();
+                house.Elevator = reader["elevator"].ToString();
+                house.Balcony = reader["balcony"].ToString();
+                house.Furnitured = reader["furnitured"].ToString();
+                house.Sublet = reader["sublet"].ToString();
+                house.FromAgency = reader["fromAgency"].ToString();
+                house.AddressesIds.Add(reader["addressConclusionId"].ToString());
+                house.DateCreated = DateTime.Parse(reader["dateCreated"].ToString());
+                house.UserSearchId = userSearch.id;
+                house.Message = reader["text"].ToString();
+
+                result.Add(house);
+            }
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return result;
+        }
+
 
         internal House GetNewHouseById(string houseId)
         {
@@ -2173,7 +2366,7 @@ namespace HunterMVC
             return result;
         }
 
-        internal List<string> GetAddressConclusionsByObjectIds(int[] objectIds, int objectType)
+        public List<string> GetAddressConclusionsByObjectIds(int[] objectIds, int objectType)
         {
             List<string> result = new List<string>();
             SqlDataReader reader = null;
@@ -2282,6 +2475,7 @@ namespace HunterMVC
                     record.DateCreated = DateTime.Parse(reader["dateCreated"].ToString());
                     record.PostText = reader["text"].ToString();
                     record.Sender = reader["sender"].ToString();
+                    record.City = reader["cityName"].ToString();
 
                     result.Add(record);
                 }
@@ -2328,6 +2522,155 @@ namespace HunterMVC
             {
                 result.Add(reader["addressConclusionId"].ToString());
 
+            }
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return result;
+        }
+
+        internal Dictionary<string, string> GetAreasByCityId(int cityId)
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            connection.Open();
+
+            String areasTable = GetAreasTableName(cityId);
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            command.CommandText = @"select * from " + areasTable;
+            command.CommandType = CommandType.Text;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result.Add(reader["id"].ToString(), reader["name"].ToString());
+            }
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return result;
+        }
+
+        internal Dictionary<string, string> GetSubAreasByCityId(int cityId)
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            connection.Open();
+
+            String subAreasTable = GetSubAreasTableName(cityId);
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            command.CommandText = @"select * from " + subAreasTable;
+            command.CommandType = CommandType.Text;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result.Add(reader["id"].ToString(), reader["name"].ToString());
+            }
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return result;
+        }
+
+        internal Dictionary<string, string> GetLocationsByCityId(int cityId)
+        {
+            Dictionary<string, string> result = new Dictionary<string, string>();
+            connection.Open();
+
+            String locationsTable = GetLocationsTableName(cityId);
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            command.CommandText = @"select * from " + locationsTable;
+            command.CommandType = CommandType.Text;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result.Add(reader["id"].ToString(), reader["name"].ToString());
+            }
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return result;
+        }
+
+
+        internal List<string> GetLocationsByAreaId(int currentAreaId, int cityId)
+        {
+            List<string> result = new List<string>();
+            connection.Open();
+
+            String locationsTable = GetLocationsTableName(cityId);
+            String locationsToNeighborhoodsTable = GetLocationsToNeighborhoodsTableName(cityId);
+            String neighborhoodsTable = GetNeighborhoodsTableName(cityId);
+            String subAreasTable = GetSubAreasTableName(cityId);
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            command.CommandText = @"select distinct l.id,l.name from " + locationsTable + @" l, " + locationsToNeighborhoodsTable + " ln, " + neighborhoodsTable + " n, " + subAreasTable + @" sa
+                                    where l.id = ln.locationId and ln.neighborhoodId = n.id and n.subAreaId = sa.id and sa.areaId = @AreaId"; 
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.Add("@AreaId", SqlDbType.Int);
+            command.Parameters["@AreaId"].Value = currentAreaId;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result.Add(reader["id"].ToString());
+            }
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return result;
+        }
+
+        internal List<string> GetSubAreasByAreaId(int currentAreaId, int cityId)
+        {
+            List<string> result = new List<string>();
+            connection.Open();
+
+            String locationsTable = GetLocationsTableName(cityId);
+            String locationsToNeighborhoodsTable = GetLocationsToNeighborhoodsTableName(cityId);
+            String subAreasTable = GetSubAreasTableName(cityId);
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            command.CommandText = @"select * from " + subAreasTable + @" sa
+                                    where sa.areaId = @AreaId";
+            command.CommandType = CommandType.Text;
+
+            command.Parameters.Add("@AreaId", SqlDbType.Int);
+            command.Parameters["@AreaId"].Value = currentAreaId;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                result.Add(reader["id"].ToString());
             }
 
             // close the connection

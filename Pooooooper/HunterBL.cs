@@ -271,9 +271,19 @@ namespace HunterMVC
             return dal.VerifyUserLogin(token, imei);
         }
 
-        internal List<House> GetApartments(UserSearch searchCriteria, DateTime lastGrabDate)
+        internal List<House> GetApartments(UserSearch searchCriteria, DateTime startDate)
         {
-            return dal.GetApartments(searchCriteria, lastGrabDate);
+            return dal.GetApartments(searchCriteria, startDate);
+        }
+
+        internal List<House> GetApartments(UserSearch searchCriteria, DateTime startDate, DateTime endDate)
+        {
+            return dal.GetApartments(searchCriteria, startDate, endDate);
+        }
+
+        internal List<HouseNames> GetApartmentsExact(UserSearch searchCriteria, DateTime startDate, DateTime endDate)
+        {
+            return dal.GetApartmentsExact(searchCriteria, startDate, endDate);
         }
 
         internal string GetApartments(string searchCriteria)
@@ -506,6 +516,36 @@ namespace HunterMVC
         internal void AttachPostsImages(ref List<House> resultFiltered)
         {
             dal.AttachPostsImages(ref resultFiltered);
+        }
+
+        internal Dictionary<string, string> GetAreasByCityId(int cityId)
+        {
+            return dal.GetAreasByCityId(cityId);
+        }
+        internal List<string> GetAddressConclusionsByObjectIds(int[] objectIds, int objectType)
+        {
+            return dal.GetAddressConclusionsByObjectIds(objectIds, objectType);
+        }
+
+
+        internal List<string> GetSubAreasByAreaId(int currentAreaId, int cityId)
+        {
+            return dal.GetSubAreasByAreaId(currentAreaId, cityId);
+        }
+
+        internal List<string> GetLocationsByAreaId(int currentAreaId, int cityId)
+        {
+            return dal.GetLocationsByAreaId(currentAreaId, cityId);
+        }
+
+        internal Dictionary<string, string> GetSubAreasByCityId(int cityId)
+        {
+            return dal.GetSubAreasByCityId(cityId);
+        }
+
+        internal Dictionary<string, string> GetLocationsByCityId(int cityId)
+        {
+            return dal.GetLocationsByCityId(cityId);
         }
     }
 }
