@@ -443,7 +443,7 @@ function generateApartmentsDetailsReport() {
                     var date = new Date(parseInt(data[i].DateCreated.substr(6)));
 
                     var curr_date = date.getDate();
-                    var curr_month = date.getMonth();
+                    var curr_month = date.getMonth() +1;
                     var curr_year = date.getFullYear();
                     var dateString = curr_date + "-" + curr_month + "-" + curr_year;
                     tdDate.innerHTML = dateString;

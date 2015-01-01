@@ -1369,9 +1369,13 @@ namespace HunterMVC
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
             String query = @"Select * 
-                            from housesFiltered h, posts p 
-                            where h.postId = p.id and purposeId = @PurposeId 
-                            and (h.dateCreated between @startDate and @endDate) ";
+                            from houses h, posts p where p.id=h.postid and h.id in (
+                                select  max(h.id) maxHouseId
+                                from houses h, posts p
+                                where h.postId  = p.id 
+                                and purposeId = @PurposeId 
+                                and (h.dateCreated between @startDate and @endDate)
+                                group by sender,h.cityId,purposeId, addressConclusionId) ";
 
             command.Parameters.Add("@PurposeId", SqlDbType.Int);
             command.Parameters["@PurposeId"].Value = userSearch.Purpose;
