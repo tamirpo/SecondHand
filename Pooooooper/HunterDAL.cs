@@ -1867,11 +1867,11 @@ namespace HunterMVC
                 command.Parameters.Add("@ToSize", SqlDbType.Int);
                 command.Parameters["@ToSize"].Value = searchCriteria.ToSize;
 
-                command.Parameters.Add("@FromRoomsNumber", SqlDbType.Int);
-                command.Parameters["@FromRoomsNumber"].Value = searchCriteria.FromRoomsNumber;
+                command.Parameters.Add("@FromRoomsNumber", SqlDbType.Float);
+                command.Parameters["@FromRoomsNumber"].Value = (float) searchCriteria.FromRoomsNumber;
 
-                command.Parameters.Add("@ToRoomsNumber", SqlDbType.Int);
-                command.Parameters["@ToRoomsNumber"].Value = searchCriteria.ToRoomsNumber;
+                command.Parameters.Add("@ToRoomsNumber", SqlDbType.Float);
+                command.Parameters["@ToRoomsNumber"].Value = (float) searchCriteria.ToRoomsNumber;
 
                 command.Parameters.Add("@FromTotalRoommatesNumber", SqlDbType.Int);
                 command.Parameters["@FromTotalRoommatesNumber"].Value = searchCriteria.FromTotalRoommatesNumber;
