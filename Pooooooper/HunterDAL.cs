@@ -1406,7 +1406,7 @@ namespace HunterMVC
 
             if (userSearch.FromRoomsNumber > 0)
             {
-                query += " and ((roomsNumber between @FromRoomsNumber and @ToRoomsNumber) or roomsNumber=0) ";
+                query += " and (roomsNumber between @FromRoomsNumber and @ToRoomsNumber) ";
                 command.Parameters.Add("@FromRoomsNumber", SqlDbType.Decimal);
                 command.Parameters["@FromRoomsNumber"].Value = userSearch.FromRoomsNumber;
                 command.Parameters.Add("@ToRoomsNumber", SqlDbType.Decimal);
