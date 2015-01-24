@@ -35,7 +35,7 @@ namespace HunterMVC.Models
 
         public List<int> SubAreas { get; set; }
 
-        public List<int> Areas { get; set; }
+        public List<String> Areas { get; set; }
 
         public String UserSearchId { get; set; }
 
@@ -63,14 +63,14 @@ namespace HunterMVC.Models
         {
             AddressesIds = new List<string>();
             Addresses = new List<AddressConclusion>();
-            Areas = new List<int>();
+            Areas = new List<String>();
         }
 
         public House() : base() 
         {
             AddressesIds = new List<string>();
             Addresses = new List<AddressConclusion>();
-            Areas = new List<int>();
+            Areas = new List<String>();
         }
 
         /**

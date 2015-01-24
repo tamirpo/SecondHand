@@ -1363,6 +1363,7 @@ namespace HunterMVC
         internal List<House> GetApartments(UserSearch userSearch, DateTime startDate, DateTime endDate)
         {
             String subAreasTableName = GetSubAreasTableName(userSearch.City);
+            String areasTableName = GetAreasTableName(userSearch.City);
 
             List<House> result = new List<House>();
 
@@ -1370,9 +1371,10 @@ namespace HunterMVC
 
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
-            String query = @"Select distinct h.*,p.*,sa.areaId realAreaId 
-                            from houses h, posts p , houseAddressConclusions ha, " + subAreasTableName + @"  sa
-                                where p.id=h.postid and h.addressConclusionId = ha.id and sa.id=ha.objectId
+            String query = @"Select distinct h.*,p.*,a.name realArea 
+                            from houses h, posts p , houseAddressConclusions ha, " + subAreasTableName + @"  sa,
+                                " + areasTableName + @" a
+                                where p.id=h.postid and h.addressConclusionId = ha.id and sa.id=ha.objectId and a.id=sa.areaId
                                 and ha.objectType=1
                                 and h.id in (
                                 select  max(h.id) maxHouseId
@@ -1493,7 +1495,7 @@ namespace HunterMVC
             while (reader.Read())
             {
                 if (lastPostId==(int)reader["postId"]){
-                    lastHouse.Areas.Add((int)reader["realAreaId"]);
+                    lastHouse.Areas.Add(reader["realArea"].ToString());
                 }
                 else{
 
@@ -1531,7 +1533,7 @@ namespace HunterMVC
                     house.UserSearchId = userSearch.id;
                     house.Message = reader["text"].ToString();
 
-                    house.Areas.Add((int)reader["realAreaId"]);
+                    house.Areas.Add(reader["realArea"].ToString());
 
                     lastHouse = house;
                     lastPostId = house.PostId;
