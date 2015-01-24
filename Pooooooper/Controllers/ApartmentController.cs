@@ -52,9 +52,8 @@ namespace HunterMVC.Controllers
         // GET api/<controller>/GetApartmentsForUser
         [TokenValidation]
         [HttpGet]
-        public HttpResponseMessage SearchApartmentsBySearchIds(string searchIds, string limitParam, string lastGrabDateParam)
+        public HttpResponseMessage SearchApartmentsBySearchIds(string searchIds, string lastGrabDateParam)
         {
-            int limit = Int32.Parse(limitParam);
             DateTime lastGrabDate = DateTime.Parse(lastGrabDateParam);
             List<string> searches = searchIds.Split(',').ToList<String>();
 
@@ -85,7 +84,8 @@ namespace HunterMVC.Controllers
 	            }
 
                 resultFiltered.Sort();
-                resultFiltered = result.GetRange(0, limit);
+                resultFiltered.Reverse();
+                //resultFiltered = result.GetRange(0, limit);
 
                 bl.AttachPostsImages(ref resultFiltered);
             }

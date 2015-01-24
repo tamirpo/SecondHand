@@ -33,6 +33,10 @@ namespace HunterMVC.Models
         public String PhoneNumber { get; set; }
         public DateTime DateCreated { get; set; }
 
+        public List<int> SubAreas { get; set; }
+
+        public List<int> Areas { get; set; }
+
         public String UserSearchId { get; set; }
 
         [ScriptIgnore]
@@ -59,13 +63,14 @@ namespace HunterMVC.Models
         {
             AddressesIds = new List<string>();
             Addresses = new List<AddressConclusion>();
-
+            Areas = new List<int>();
         }
 
         public House() : base() 
         {
             AddressesIds = new List<string>();
             Addresses = new List<AddressConclusion>();
+            Areas = new List<int>();
         }
 
         /**

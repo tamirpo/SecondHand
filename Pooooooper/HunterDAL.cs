@@ -1362,14 +1362,19 @@ namespace HunterMVC
 
         internal List<House> GetApartments(UserSearch userSearch, DateTime startDate, DateTime endDate)
         {
+            String subAreasTableName = GetSubAreasTableName(userSearch.City);
+
             List<House> result = new List<House>();
 
             connection.Open();
 
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
-            String query = @"Select * 
-                            from houses h, posts p where p.id=h.postid and h.id in (
+            String query = @"Select distinct h.*,p.*,sa.areaId realAreaId 
+                            from houses h, posts p , houseAddressConclusions ha, " + subAreasTableName + @"  sa
+                                where p.id=h.postid and h.addressConclusionId = ha.id and sa.id=ha.objectId
+                                and ha.objectType=1
+                                and h.id in (
                                 select  max(h.id) maxHouseId
                                 from houses h, posts p
                                 where h.postId  = p.id 
@@ -1483,38 +1488,60 @@ namespace HunterMVC
             // execute the command that returns a SqlDataReader
             SqlDataReader reader = command.ExecuteReader();
             
+            int lastPostId = 0;
+            House lastHouse = null;
             while (reader.Read())
             {
-                House house = new House();
+                if (lastPostId==(int)reader["postId"]){
+                    lastHouse.Areas.Add((int)reader["realAreaId"]);
+                }
+                else{
 
-                house.PostId = (int)reader["postId"];
-                house.CityId = (int)reader["cityId"];
-                house.RoomsNumber = Double.Parse(reader["roomsnumber"].ToString());
-                house.RoommatesNumber = (int)reader["totalRoommatesnumber"];
-                house.SideId = (int)reader["sideId"];
-                house.ParkingId = (int)reader["parkingId"];
-                house.RenovatedId = (int)reader["renovatedId"];
-                house.PurposeId = (int)reader["purposeId"];
-                house.Floor = (int)reader["floor"];
-                house.TypeId = (int)reader["typeId"];
-                house.id = (int)reader["id"];
-                house.Size = (int)reader["size"];
-                house.Price = (int)reader["price"];
-                house.HouseNumber = (int)reader["houseNumber"];
-                house.SmokeId = (int)reader["smokeId"];
-                house.PetsId = (int)reader["petsId"];
-                house.ElevatorId = (int)reader["elevatorId"];
-                house.BalconyId = (int)reader["balconyId"];
-                house.FurnituredId = (int)reader["furnituredId"];
-                house.SubletId = (int)reader["subletId"];
-                house.FromAgencyId = (int)reader["fromAgencyId"];
-                house.PhoneNumber = reader["phoneNumber"].ToString();
-                house.AddressesIds.Add(reader["addressConclusionId"].ToString());
-                house.DateCreated = DateTime.Parse(reader["dateCreated"].ToString());
-                house.UserSearchId = userSearch.id;
-                house.Message = reader["text"].ToString();
+                    if (lastHouse != null && lastPostId!=0)
+                    {
+                        result.Add(lastHouse);
+                    }
 
-                result.Add(house); 
+                    House house = new House();
+
+                    house.PostId = (int)reader["postId"];
+                    house.CityId = (int)reader["cityId"];
+                    house.RoomsNumber = Double.Parse(reader["roomsnumber"].ToString());
+                    house.RoommatesNumber = (int)reader["totalRoommatesnumber"];
+                    house.SideId = (int)reader["sideId"];
+                    house.ParkingId = (int)reader["parkingId"];
+                    house.RenovatedId = (int)reader["renovatedId"];
+                    house.PurposeId = (int)reader["purposeId"];
+                    house.Floor = (int)reader["floor"];
+                    house.TypeId = (int)reader["typeId"];
+                    house.id = (int)reader["id"];
+                    house.Size = (int)reader["size"];
+                    house.Price = (int)reader["price"];
+                    house.HouseNumber = (int)reader["houseNumber"];
+                    house.SmokeId = (int)reader["smokeId"];
+                    house.PetsId = (int)reader["petsId"];
+                    house.ElevatorId = (int)reader["elevatorId"];
+                    house.BalconyId = (int)reader["balconyId"];
+                    house.FurnituredId = (int)reader["furnituredId"];
+                    house.SubletId = (int)reader["subletId"];
+                    house.FromAgencyId = (int)reader["fromAgencyId"];
+                    house.PhoneNumber = reader["phoneNumber"].ToString();
+                    house.AddressesIds.Add(reader["addressConclusionId"].ToString());
+                    house.DateCreated = DateTime.Parse(reader["dateCreated"].ToString());
+                    house.UserSearchId = userSearch.id;
+                    house.Message = reader["text"].ToString();
+
+                    house.Areas.Add((int)reader["realAreaId"]);
+
+                    lastHouse = house;
+                    lastPostId = house.PostId;
+                    
+                }
+            }
+
+            if (lastHouse != null)
+            {
+                result.Add(lastHouse);
             }
 
             // close the connection
