@@ -1532,7 +1532,7 @@ namespace HunterMVC
                     house.DateCreated = DateTime.Parse(reader["dateCreated"].ToString());
                     house.UserSearchId = userSearch.id;
                     house.Message = reader["text"].ToString();
-
+                    house.SenderPictureURL = reader["senderPictureURL"].ToString();
                     house.Areas.Add(reader["realArea"].ToString());
 
                     lastHouse = house;

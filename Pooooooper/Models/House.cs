@@ -144,5 +144,7 @@ namespace HunterMVC.Models
             throw new NotImplementedException();
             return base.GetHashCode();
         }
+
+        public string SenderPictureURL { get; set; }
     }
 }
