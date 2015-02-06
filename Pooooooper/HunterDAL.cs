@@ -1822,50 +1822,37 @@ namespace HunterMVC
             return result;
         }
 
-        internal String SaveUserSearch(UserSearch searchCriteria)
+        internal String SaveUserSearch(UserSearch searchCriteria, String searchId)
         {
             String result = String.Empty;
             SqlDataReader reader = null;
             try
             {
                 connection.Open();
-
-                // create a SqlCommand object for this connection
                 SqlCommand command = connection.CreateCommand();
                 command.CommandType = CommandType.Text;
 
-                Guid id = Guid.NewGuid();
+                if (String.IsNullOrEmpty(searchId))
+                {
+                    searchId = Guid.NewGuid().ToString();
+
+                    foreach (string currentId in searchCriteria.AddressConclusionIds)
+                    {
+                        command.CommandText += @"
+                            insert into house_searches 
+                            (id,purposeid,subletId,fromprice,toprice,cityid,addressConclusionId,fromSize,toSize,fromroomsnumber,
+                            toroomsnumber,fromTotalRoommatesNumber,parkingid,renovatedId,petsId,smokeId,furnituredId,balconyId,
+                            fromAgencyId) 
+                            values 
+                            (@Id,@Purposeid,@SubletId,@FromPrice,@ToPrice,@Cityid,'" + currentId + @"',@FromSize,
+                            @ToSize,@FromRoomsNumber,@ToRoomsNumber,@FromTotalRoommatesNumber,@Parkingid,@RenovatedId,@PetsId,
+                            @SmokeId,@FurnituredId,@BalconyId,@FromAgencyId);";
+                    }
+                }
+                command.CommandText += @"insert into users_house_searches (userId,searchId) values (@UserId,@Id);";
+
                 command.Parameters.Add("@Id", SqlDbType.NVarChar);
-                command.Parameters["@Id"].Value = id.ToString();
-
-                foreach (string currentId in searchCriteria.AddressConclusionIds)
-                {
-
-                    command.CommandText += @"insert into users_searches 
-                                (id,userid,purposeid,subletId,fromprice,toprice,cityid,addressConclusionId,fromSize,toSize,fromroomsnumber,
-                                toroomsnumber,fromTotalRoommatesNumber,parkingid,renovatedId,petsId,smokeId,furnituredId,balconyId,
-                                fromAgencyId) 
-                                values 
-                                (@Id,@Userid,@Purposeid,@SubletId,@FromPrice,@ToPrice,@Cityid,'" + currentId + @"',@FromSize,
-                                @ToSize,@FromRoomsNumber,@ToRoomsNumber,@FromTotalRoommatesNumber,@Parkingid,@RenovatedId,@PetsId,
-                                @SmokeId,@FurnituredId,@BalconyId,@FromAgencyId);";
-                }
-
-                /*for (int i = 0; i < searchCriteria.SubAreas.Length; i++)
-                {
-                    command.Parameters.Add("@SubAreaId_" + i, SqlDbType.Int);
-                    command.Parameters["@SubAreaId_" + i].Value = searchCriteria.SubAreas[i];
-
-                    command.CommandText += @"insert into users_searches (id,userid,purposeid,subletId,fromprice,toprice,cityid,subareaId,fromSize,toSize,fromroomsnumber,toroomsnumber,fromTotalRoommatesNumber,parkingid,renovatedId,petsId,smokeId,furnituredId,balconyId,fromAgencyId) values (@Id,@Userid,@Purposeid,@SubletId,@FromPrice,@ToPrice,@Cityid,@SubAreaId_" + i + ",@FromSize,@ToSize,@FromRoomsNumber,@ToRoomsNumber,@FromTotalRoommatesNumber,@Parkingid,@RenovatedId,@PetsId,@SmokeId,@FurnituredId,@BalconyId,@FromAgencyId);";
-                }
-
-                for (int i = 0; i < searchCriteria.Locations.Length; i++)
-                {
-                    command.Parameters.Add("@LocationId_" + i, SqlDbType.Int);
-                    command.Parameters["@LocationId_" + i].Value = searchCriteria.Locations[i];
-
-                    command.CommandText += @"insert into users_searches (id,userid,purposeid,subletId,fromprice,toprice,cityid,locationId,fromSize,toSize,fromroomsnumber,toroomsnumber,fromTotalRoommatesNumber,parkingid,renovatedId,petsId,smokeId,furnituredId,balconyId,fromAgencyId) values (@Id,@Userid,@Purposeid,@SubletId,@FromPrice,@ToPrice,@Cityid,@LocationId_" + i + ",@FromSize,@ToSize,@FromRoomsNumber,@ToRoomsNumber,@FromTotalRoommatesNumber,@Parkingid,@RenovatedId,@PetsId,@SmokeId,@FurnituredId,@BalconyId,@FromAgencyId);";
-                }*/
+                command.Parameters["@Id"].Value = searchId;
 
                 command.Parameters.Add("@UserId", SqlDbType.Char);
                 command.Parameters["@UserId"].Value = searchCriteria.UserId;
@@ -1885,11 +1872,6 @@ namespace HunterMVC
                 command.Parameters.Add("@CityId", SqlDbType.Int);
                 command.Parameters["@CityId"].Value = searchCriteria.City;
 
-               /* command.Parameters.Add("@NeighborhoodId", SqlDbType.Int);
-                command.Parameters["@NeighborhoodId"].Value = searchCriteria.NeighborhoodId;
-            
-
-                */
                 command.Parameters.Add("@FromSize", SqlDbType.Int);
                 command.Parameters["@FromSize"].Value = searchCriteria.FromSize;
 
@@ -1904,6 +1886,9 @@ namespace HunterMVC
 
                 command.Parameters.Add("@FromTotalRoommatesNumber", SqlDbType.Int);
                 command.Parameters["@FromTotalRoommatesNumber"].Value = searchCriteria.FromTotalRoommatesNumber;
+
+                command.Parameters.Add("@ToTotalRoommatesNumber", SqlDbType.Int);
+                command.Parameters["@ToTotalRoommatesNumber"].Value = searchCriteria.ToTotalRoommatesNumber;
 
                 command.Parameters.Add("@Parkingid", SqlDbType.Int);
                 command.Parameters["@Parkingid"].Value = searchCriteria.Parking;
@@ -1929,7 +1914,7 @@ namespace HunterMVC
                 // execute the command that returns a SqlDataReader
                 reader = command.ExecuteReader();
 
-                result = id.ToString();
+                result = searchId;
             }
             catch (Exception ex)
             {
@@ -2424,7 +2409,12 @@ namespace HunterMVC
                 }
 
 
-                command.CommandText = @"select * 
+                command.CommandText = @"select *
+	                                            from houseAddressConclusions
+	                                            where objectType=@ObjectType
+	                                            and objectId in (" + inArray + @")";
+
+                /*command.CommandText = @"select * 
                                         from houseaddressconclusions 
                                         where id in (
 	                                        select id
@@ -2447,7 +2437,7 @@ namespace HunterMVC
 		                                    group by id
 		                                    having count(distinct objectId) <=" + objectIds.Length + @")
 	                                        and objectid not in (" + inArray + @"))";
-              
+              */
                 command.CommandType = CommandType.Text;
                 command.Parameters.Add("@ObjectType", SqlDbType.NVarChar);
                 command.Parameters["@ObjectType"].Value = objectType;
@@ -2709,6 +2699,132 @@ namespace HunterMVC
             // close the connection
             reader.Close();
             connection.Close();
+
+            return result;
+        }
+
+        internal string GetSearchId(UserSearch searchCriteria)
+        {
+            String result = String.Empty;
+            SqlDataReader reader = null;
+            try
+            {
+                connection.Open();
+
+                // create a SqlCommand object for this connection
+                SqlCommand command = connection.CreateCommand();
+                command.CommandType = CommandType.Text;
+            
+                string inArray = String.Empty;
+                foreach (string currentAddressId in searchCriteria.AddressConclusionIds)
+                {
+                    inArray += "'" + currentAddressId + "',";
+                }
+                inArray = inArray.Substring(0,inArray.Length-1);
+
+                command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
+                                and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
+                                cityid=@CityId and fromSize = @FromSize
+                                and toSize = @ToSize and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
+                                and fromTotalRoommatesNumber = @FromTotalRoommatesNumber and toTotalRoommatesNumber=@ToTotalRoommatesNumber
+                                and parkingid=@Parkingid and renovatedId=@RenovatedId and petsId=@PetsId and smokeId=@SmokeId
+                                and furnituredId=@FurnituredId and balconyId=@BalconyId and fromAgencyId=@FromAgencyId
+                                and id in ( 
+                                    select id FROM house_searches
+                                    GROUP BY id
+                                    HAVING
+                                       Sum(CASE WHEN addressConclusionId IN (" + inArray + @")
+                                                THEN 1 
+                                                ELSE 0 
+                                            END) = "+searchCriteria.AddressConclusionIds.Count + ")";
+
+
+                command.Parameters.Add("@UserId", SqlDbType.Char);
+                command.Parameters["@UserId"].Value = searchCriteria.UserId;
+
+                command.Parameters.Add("@Purposeid", SqlDbType.Int);
+                command.Parameters["@Purposeid"].Value = searchCriteria.Purpose;
+
+                command.Parameters.Add("@SubletId", SqlDbType.Int);
+                command.Parameters["@SubletId"].Value = searchCriteria.Sublet;
+
+                command.Parameters.Add("@FromPrice", SqlDbType.Int);
+                command.Parameters["@FromPrice"].Value = searchCriteria.FromPrice;
+
+                command.Parameters.Add("@ToPrice", SqlDbType.Int);
+                command.Parameters["@ToPrice"].Value = searchCriteria.ToPrice;
+
+                command.Parameters.Add("@CityId", SqlDbType.Int);
+                command.Parameters["@CityId"].Value = searchCriteria.City;
+
+               /* command.Parameters.Add("@NeighborhoodId", SqlDbType.Int);
+                command.Parameters["@NeighborhoodId"].Value = searchCriteria.NeighborhoodId;
+            
+
+                */
+                command.Parameters.Add("@FromSize", SqlDbType.Int);
+                command.Parameters["@FromSize"].Value = searchCriteria.FromSize;
+
+                command.Parameters.Add("@ToSize", SqlDbType.Int);
+                command.Parameters["@ToSize"].Value = searchCriteria.ToSize;
+
+                command.Parameters.Add("@FromRoomsNumber", SqlDbType.Float);
+                command.Parameters["@FromRoomsNumber"].Value = (float) searchCriteria.FromRoomsNumber;
+
+                command.Parameters.Add("@ToRoomsNumber", SqlDbType.Float);
+                command.Parameters["@ToRoomsNumber"].Value = (float) searchCriteria.ToRoomsNumber;
+
+                command.Parameters.Add("@FromTotalRoommatesNumber", SqlDbType.Int);
+                command.Parameters["@FromTotalRoommatesNumber"].Value = searchCriteria.FromTotalRoommatesNumber;
+
+
+                command.Parameters.Add("@ToTotalRoommatesNumber", SqlDbType.Int);
+                command.Parameters["@ToTotalRoommatesNumber"].Value = searchCriteria.ToTotalRoommatesNumber;
+
+                command.Parameters.Add("@Parkingid", SqlDbType.Int);
+                command.Parameters["@Parkingid"].Value = searchCriteria.Parking;
+                
+                command.Parameters.Add("@RenovatedId", SqlDbType.Int);
+                command.Parameters["@RenovatedId"].Value = searchCriteria.Renovated;
+
+                command.Parameters.Add("@PetsId", SqlDbType.Int);
+                command.Parameters["@PetsId"].Value = searchCriteria.Pets;
+
+                command.Parameters.Add("@SmokeId", SqlDbType.Int);
+                command.Parameters["@SmokeId"].Value = searchCriteria.Smoke;
+
+                command.Parameters.Add("@FurnituredId", SqlDbType.Int);
+                command.Parameters["@FurnituredId"].Value = searchCriteria.Furnitured;
+
+                command.Parameters.Add("@BalconyId", SqlDbType.Int);
+                command.Parameters["@BalconyId"].Value = searchCriteria.Balcony;
+
+                command.Parameters.Add("@FromAgencyId", SqlDbType.Int);
+                command.Parameters["@FromAgencyId"].Value = searchCriteria.FromAgency;
+
+                // execute the command that returns a SqlDataReader
+                reader = command.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    result = reader["id"].ToString();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                result = ex.Message;
+            }
+            finally
+            {
+                // close the connection
+                if (reader != null && !reader.IsClosed)
+                {
+                    reader.Close();
+                }
+                connection.Close();
+
+            }
 
             return result;
         }

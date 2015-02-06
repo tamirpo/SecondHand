@@ -446,6 +446,7 @@ namespace HunterMVC
 
         internal String SaveUserSearch(UserSearch searchCriteria)
         {
+            String result = String.Empty;
             if (searchCriteria.SubAreas != null && searchCriteria.SubAreas.Length > 0)
             {
                 searchCriteria.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(searchCriteria.SubAreas, 1));
@@ -454,7 +455,11 @@ namespace HunterMVC
             {
                 searchCriteria.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(searchCriteria.Locations, 2));
             }
-            return dal.SaveUserSearch(searchCriteria);
+
+            String existingSearchId = dal.GetSearchId(searchCriteria);
+            result = dal.SaveUserSearch(searchCriteria, existingSearchId);
+
+            return result;
         }
 
         internal List<UserSearch> GetUserSearchesByIdsWithoutAddresses(List<string> searchIds)
