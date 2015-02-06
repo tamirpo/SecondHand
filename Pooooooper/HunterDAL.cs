@@ -1951,7 +1951,7 @@ namespace HunterMVC
             command.CommandText = @"select distinct cityId,FromRoomsNumber, ToRoomsNumber, FromTotalRoommatesnumber, 
                                     ToTotalRoommatesnumber, parkingId, renovatedId, purposeId, id,fromSize,toSize,  FromPrice,ToPrice,
                                     smokeId, petsId, balconyId, furnituredId, subletId, fromAgencyId 
-                                    from users_searches where id in (" + inArray + ") order by id";
+                                    from house_searches where id in (" + inArray + ") order by id";
             command.CommandType = CommandType.Text;
 
             // execute the command that returns a SqlDataReader
