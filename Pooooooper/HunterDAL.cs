@@ -1318,6 +1318,11 @@ namespace HunterMVC
 
         internal void AttachPostsImages(ref List<House> houses)
         {
+            if (houses.Count == 0)
+            {
+                return;
+            }
+
             List<House> result = new List<House>();
 
             connection.Open();
@@ -2535,7 +2540,7 @@ namespace HunterMVC
 
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
-            command.CommandText = @"select distinct addressConclusionId from users_searches where id in (" + inArray + ") ";
+            command.CommandText = @"select distinct addressConclusionId from house_searches where id in (" + inArray + ") ";
             command.CommandType = CommandType.Text;
 
             // execute the command that returns a SqlDataReader
