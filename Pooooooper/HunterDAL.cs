@@ -1839,7 +1839,7 @@ namespace HunterMVC
 
                 if (String.IsNullOrEmpty(searchId))
                 {
-                    searchId = Guid.NewGuid().ToString();
+                    searchId = "H" + Guid.NewGuid().ToString();
 
                     foreach (string currentId in searchCriteria.AddressConclusionIds)
                     {

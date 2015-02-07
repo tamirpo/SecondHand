@@ -52,9 +52,9 @@ namespace HunterMVC.Controllers
         // GET api/<controller>/GetApartmentsForUser
         [TokenValidation]
         [HttpGet]
-        public HttpResponseMessage SearchApartmentsBySearchIds(string searchIds, string lastGrabDateParam)
+        public HttpResponseMessage SearchApartmentsBySearchIds(string searchIds)
         {
-            DateTime lastGrabDate = DateTime.Parse(lastGrabDateParam);
+            DateTime lastGrabDate = DateTime.Now.AddDays(-7);
             List<string> searches = searchIds.Split(',').ToList<String>();
 
             List<House> result = new List<House>();
