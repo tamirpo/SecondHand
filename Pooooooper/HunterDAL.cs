@@ -1512,6 +1512,7 @@ namespace HunterMVC
                     House house = new House();
 
                     house.PostId = (int)reader["postId"];
+                    house.SenderId = reader["sender"].ToString();
                     house.CityId = (int)reader["cityId"];
                     house.RoomsNumber = Double.Parse(reader["roomsnumber"].ToString());
                     house.RoommatesNumber = (int)reader["totalRoommatesnumber"];

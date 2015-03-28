@@ -11,6 +11,8 @@ namespace HunterMVC.Models
 
         public String Message { get; set; }
 
+        public String SenderId { get; set; }
+
         public String[] MessageWords { get; set; }
         public String Type { get; set; }
         [ScriptIgnore]
