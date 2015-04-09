@@ -2881,7 +2881,7 @@ namespace HunterMVC
                 command.Parameters.Add("@ToTotalRoommatesNumber", SqlDbType.Int);
                 command.Parameters["@ToTotalRoommatesNumber"].Value = searchCriteria.ToTotalRoommatesNumber;
 
-
+                bool firstIteration = true;
                 foreach (AddressCriteria currentAddress in searchCriteria.Addresses)
                 {
                     if (currentAddress.Areas != null && currentAddress.Areas.Length > 0)
@@ -2893,8 +2893,10 @@ namespace HunterMVC
                         }
                         inArray = inArray.Substring(0, inArray.Length - 1);
 
-
-                        command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
+                        if (!firstIteration){
+                            command.CommandText += " union ";
+                        }
+                        command.CommandText += @"SELECT distinct id,cityId FROM house_searches where purposeId=@PurposeId
                                 and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
                                 cityid=" + currentAddress.City + @"
                                 and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
@@ -2910,7 +2912,10 @@ namespace HunterMVC
                         }
                         inArray = inArray.Substring(0, inArray.Length - 1);
 
-                        command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
+                        if (!firstIteration){
+                            command.CommandText += " union ";
+                        }
+                        command.CommandText += @"SELECT distinct id,cityId FROM house_searches where purposeId=@PurposeId
                                 and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
                                 cityid=" + currentAddress.City + @"
                                 and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
@@ -2931,23 +2936,27 @@ namespace HunterMVC
                                             END) = " + currentAddress.Locations.Length + ")";*/
                     }
 
-                    // execute the command that returns a SqlDataReader
-                    reader = command.ExecuteReader();
+                    firstIteration = false;
+                }
 
-                    while (reader.Read())
+                // execute the command that returns a SqlDataReader
+                reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    String id = reader["id"].ToString();
+                    int cityId = (int)reader["cityId"];
+
+                    if (cityToSearchIds.ContainsKey(cityId))
                     {
-                        if (cityToSearchIds.ContainsKey(currentAddress.City))
-                        {
-                            cityToSearchIds[currentAddress.City].Add(reader["id"].ToString());
-                        }
-                        else
-                        {
-                            List<String> tmpArray = new List<string>();
-                            tmpArray.Add(reader["id"].ToString());
-                            cityToSearchIds.Add(currentAddress.City, tmpArray);
-                        }
+                        cityToSearchIds[cityId].Add(id);
                     }
-                    
+                    else
+                    {
+                        List<String> tmpArray = new List<string>();
+                        tmpArray.Add(id);
+                        cityToSearchIds.Add(cityId, tmpArray);
+                    }
                 }
 
                 if (cityToSearchIds.Count > 0)
