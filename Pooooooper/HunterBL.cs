@@ -123,8 +123,8 @@ namespace HunterMVC
                     returnedHouse.ExpressionsVsTypes.Add(rootExpression, "מעלית");
                 }
 
-                returnedHouse.Addresses = dal.GetHouseAddressesIds(returnedHouse.AddressesIds);
-                foreach (AddressConclusion currentAddress in returnedHouse.Addresses)
+                //returnedHouse.Addresses = dal.GetHouseAddressesIds(returnedHouse.AddressesIds);
+                /*foreach (AddressConclusion currentAddress in returnedHouse.Addresses)
                 {
                     foreach (int currentLocationId in currentAddress.LocationsIds)
                     {
@@ -134,7 +134,7 @@ namespace HunterMVC
                     {
                         currentAddress.SubAreas.Add(dal.GetSubAreaNameFromId(currentSubAreaId, returnedHouse.CityId));
                     }
-                }
+                }*/
 
 
                 /*
@@ -391,7 +391,7 @@ namespace HunterMVC
                     returnedHouse.ExpressionsVsTypes.Add(rootExpression, "מעלית");
                 }
 
-                returnedHouse.Addresses = dal.GetHouseAddressesIds(returnedHouse.AddressesIds);
+                /*returnedHouse.Addresses = dal.GetHouseAddressesIds(returnedHouse.AddressesIds);
                 foreach (AddressConclusion currentAddress in returnedHouse.Addresses)
                 {
                     foreach (int currentLocationId in currentAddress.LocationsIds)
@@ -403,7 +403,7 @@ namespace HunterMVC
                         currentAddress.SubAreas.Add(dal.GetSubAreaNameFromId(currentSubAreaId, returnedHouse.CityId));
                     }
                 }
-
+                */
 
                 /*
 
@@ -447,14 +447,31 @@ namespace HunterMVC
         internal String SaveUserSearch(UserSearch searchCriteria)
         {
             String result = String.Empty;
-            if (searchCriteria.SubAreas != null && searchCriteria.SubAreas.Length > 0)
+            /*foreach (AddressCriteria currentAddress in searchCriteria.Addresses)
             {
-                searchCriteria.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(searchCriteria.SubAreas, 1));
-            }
-            if (searchCriteria.Locations != null && searchCriteria.Locations.Length > 0)
-            {
-                searchCriteria.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(searchCriteria.Locations, 2));
-            }
+                if (currentAddress.City == 1)
+                {
+                    if (currentAddress.Areas != null && currentAddress.Areas.Length > 0)
+                    {
+                        currentAddress.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(currentAddress.Areas, 1));
+                    }
+                    if (currentAddress.Locations != null && currentAddress.Locations.Length > 0)
+                    {
+                        currentAddress.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(currentAddress.Locations, 2));
+                    }
+                }
+                else
+                {
+                    if (currentAddress.Locations != null && currentAddress.Locations.Length > 0)
+                    {
+                        currentAddress.AddressConclusionIds.AddRange(dal.GetAddressConclusionsByObjectIds(currentAddress.Locations, 2));
+                    }
+                    else
+                    {
+                        currentAddress.AddressConclusionIds.Add(currentAddress.City.ToString());
+                    }
+                }
+            }*/
 
             String existingSearchId = dal.GetSearchId(searchCriteria);
             result = dal.SaveUserSearch(searchCriteria, existingSearchId);
@@ -462,9 +479,9 @@ namespace HunterMVC
             return result;
         }
 
-        internal List<UserSearch> GetUserSearchesByIdsWithoutAddresses(List<string> searchIds)
+        internal List<UserSearch> GetUserSearchesByIds(List<string> searchIds)
         {
-            return dal.GetUserSearchesByIdsWithoutAddresses(searchIds);
+            return dal.GetUserSearchesByIds(searchIds);
         }
 
         internal Dictionary<string, string> GetNeighborhoods(int cityId)

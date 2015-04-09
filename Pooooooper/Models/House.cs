@@ -33,8 +33,6 @@ namespace HunterMVC.Models
         public String PhoneNumber { get; set; }
         public DateTime DateCreated { get; set; }
 
-        public List<int> SubAreas { get; set; }
-
         public List<String> Areas { get; set; }
 
         public String UserSearchId { get; set; }
@@ -56,21 +54,26 @@ namespace HunterMVC.Models
         [ScriptIgnore] 
         public string AreasFound { get; set; }
 
-        public List<AddressConclusion> Addresses { get; set; }
-        public List<string> AddressesIds { get; set; }
+        public List<int> AreaIds { get; set; }
+        public List<int> LocationIds { get; set; }
+
+        //public List<AddressConclusion> Addresses { get; set; }
+        //public List<string> AddressesIds { get; set; }
 
         public House(String message) : base(message)
         {
-            AddressesIds = new List<string>();
-            Addresses = new List<AddressConclusion>();
+            //AddressesIds = new List<string>();
+            //Addresses = new List<AddressConclusion>();
             Areas = new List<String>();
         }
 
         public House() : base() 
         {
-            AddressesIds = new List<string>();
-            Addresses = new List<AddressConclusion>();
+            //AddressesIds = new List<string>();
+            //Addresses = new List<AddressConclusion>();
             Areas = new List<String>();
+            AreaIds = new List<int>();
+            LocationIds = new List<int>();
         }
 
         /**
@@ -115,8 +118,8 @@ namespace HunterMVC.Models
 
             this.PhoneNumber = otherHouse.PhoneNumber;
 
-            this.Addresses = otherHouse.Addresses;
-            this.AddressesIds = otherHouse.AddressesIds;
+            //this.Addresses = otherHouse.Addresses;
+            //this.AddressesIds = otherHouse.AddressesIds;
         }
 
         public int CompareTo(object obj)

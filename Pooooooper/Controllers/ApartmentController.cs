@@ -62,7 +62,7 @@ namespace HunterMVC.Controllers
 
             HunterBL bl = new HunterBL();
 
-            List<UserSearch> userSearches = bl.GetUserSearchesByIdsWithoutAddresses(searches);
+            List<UserSearch> userSearches = bl.GetUserSearchesByIds(searches);
             foreach (UserSearch userSearch in userSearches)
             {
                 List<House> currentSeachResult = bl.GetApartments(userSearch, lastGrabDate);
@@ -77,11 +77,12 @@ namespace HunterMVC.Controllers
 
             if (result.Count > 0)
             {
-                List<string> addresses = bl.GetAddressConclusionIdsFromUserSearches(searches);
+                resultFiltered = result;
+                /*List<string> addresses = bl.GetAddressConclusionIdsFromUserSearches(searches);
                 foreach (string currentAddress in addresses)
 	            {
                     resultFiltered.AddRange(result.Where(o => o.AddressesIds.Contains(currentAddress)));
-	            }
+	            }*/
 
                 resultFiltered.Sort();
                 resultFiltered.Reverse();
@@ -111,6 +112,24 @@ namespace HunterMVC.Controllers
         [TokenValidation]
         public string SaveSearch([NakedBody] string searchCriteriaJson)
         {
+            /*{
+              "ToPrice": 5500,
+              "ToRoomsNumber": 2.5,
+              "Addresses": [
+                {
+                  "City": 1,
+                  "Areas": [
+                    2,
+                    4
+                  ],
+                  "Locations": []
+                }
+              ],
+              "Purpose": 19,
+              "FromPrice": 4000,
+              "UserId": "357506057604808",
+              "FromRoomsNumber": 2
+            }*/
             String result = String.Empty;
             try
             {

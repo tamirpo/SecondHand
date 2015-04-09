@@ -15,9 +15,8 @@ namespace HunterMVC.Models
         public int FromPrice { get; set; }
         public int ToPrice { get; set; }
 
-        public int City { get; set; }
-        public int[] SubAreas { get; set; }
-        public int[] Locations { get; set; }
+        public AddressCriteria[] Addresses  { get; set; }
+
         public int FromSize { get; set; }
         public int ToSize { get; set; }
         public double FromRoomsNumber { get; set; }
@@ -34,11 +33,10 @@ namespace HunterMVC.Models
 
         public List<int> SubAreasIds { get; set; }
         public List<int> LocationsIds { get; set; }
-        public List<string> AddressConclusionIds { get; set; }
+        
 
         public UserSearch()
         {
-            AddressConclusionIds = new List<string>();
             SubAreasIds = new List<int>();
             LocationsIds = new List<int>();
         }

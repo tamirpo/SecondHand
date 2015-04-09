@@ -225,7 +225,7 @@ namespace HunterMVC.Controllers
             }
 
             UserSearch search = new UserSearch();
-            search.City = cityId;
+            //search.City = cityId;
             search.Balcony = balcony;
             search.FromAgency = fromAgency;
             search.FromPrice = fromPrice;
@@ -256,7 +256,7 @@ namespace HunterMVC.Controllers
                 }
             }
 
-            if (result.Count > 0)
+            /*if (result.Count > 0)
             {
                 if (locationId > 0)
                 {
@@ -326,7 +326,7 @@ namespace HunterMVC.Controllers
                 }
 
                 resultFiltered.Sort();
-            }
+            }*/
 
             return Json(resultFiltered, JsonRequestBehavior.AllowGet);
         }
