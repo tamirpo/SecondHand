@@ -1394,7 +1394,8 @@ namespace HunterMVC
                                 and h.id in (
                                 select  max(h.id) maxHouseId
                                 from houses h, posts p
-                                where h.postId  = p.id 
+                                where h.postId  = p.id                          
+                                and CityId = " + currentAddress.City + @"
                                 and purposeId = @PurposeId 
                                 and h.areaId in (" + inArray + @")
                                 and (h.dateCreated between @startDate and @endDate)
@@ -1420,6 +1421,7 @@ namespace HunterMVC
                                 select  max(h.id) maxHouseId
                                 from houses h, posts p
                                 where h.postId  = p.id 
+                                and CityId = " + currentAddress.City + @"
                                 and purposeId = @PurposeId 
                                 and h.locationId in (" + inArray + @")
                                 and (h.dateCreated between @startDate and @endDate)
@@ -1470,12 +1472,6 @@ namespace HunterMVC
                         command.Parameters.Add("@ToTotalRoommatesNumber", SqlDbType.Int);
                         command.Parameters["@ToTotalRoommatesNumber"].Value = userSearch.ToTotalRoommatesNumber;
                     }
-                }
-                if (currentAddress.City > 0)
-                {
-                    query += " and CityId = @CityId ; ";
-                    command.Parameters.Add("@CityId", SqlDbType.Int);
-                    command.Parameters["@CityId"].Value = currentAddress.City;
                 }
             }
 
