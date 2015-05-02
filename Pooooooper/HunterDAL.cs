@@ -1404,7 +1404,7 @@ namespace HunterMVC
                 else if (currentAddress.Locations!=null && currentAddress.Locations.Length>0)
                 {
                     string inArray = String.Empty;
-                    foreach (int currentSearchId in currentAddress.Areas)
+                    foreach (int currentSearchId in currentAddress.Locations)
                     {
                         inArray += "'" + currentSearchId + "',";
                     }
@@ -2055,14 +2055,17 @@ namespace HunterMVC
                     userSearch.Sublet = (int)reader["subletId"];
                     userSearch.Addresses = new AddressCriteria[1];
                     userSearch.Addresses[0] = new AddressCriteria();
-                    userSearch.Addresses[0].Areas = new int[1];
-                    if ((int)reader["areaId"] > 0)
+                    
+
+                    if (reader["areaId"]!=null && (int)reader["areaId"] > 0)
                     {
+                        userSearch.Addresses[0].Areas = new int[1];
                         userSearch.Addresses[0].Areas[0] = (int)reader["areaId"];
                     }
-                    userSearch.Addresses[0].Locations = new int[1];
-                    if ((int)reader["locationId"] > 0)
+                    
+                    if (reader["locationId"] != null && (int)reader["locationId"] > 0)
                     {
+                        userSearch.Addresses[0].Locations = new int[1];
                         userSearch.Addresses[0].Locations[0] = (int)reader["locationId"];
                     }
                     userSearch.Addresses[0].City = (int)reader["cityId"];
@@ -2078,7 +2081,7 @@ namespace HunterMVC
                         for (int i = 0; i < userSearch.Addresses.Length; i++)
                         {
                             tmpAddresses[i] = new AddressCriteria();
-                            if ((int)reader["areaId"] > 0)
+                            if (reader["areaId"] != null && (int)reader["areaId"] > 0)
                             {
                                 tmpAddresses[i].Areas = new int[userSearch.Addresses[i].Areas.Length + 1];
                                 for (int j = 0; j < userSearch.Addresses[i].Areas.Length; j++)
@@ -2087,7 +2090,7 @@ namespace HunterMVC
                                 }
                                 tmpAddresses[i].Areas[tmpAddresses[i].Areas.Length - 1] = (int)reader["areaId"];
                             }
-                            else if ((int)reader["locationId"] > 0)
+                            else if (reader["locationId"] != null && (int)reader["locationId"] > 0)
                             {
                                 tmpAddresses[i].Locations = new int[userSearch.Addresses[i].Locations.Length + 1];
                                 for (int j = 0; j < userSearch.Addresses[i].Locations.Length; j++)
@@ -2109,9 +2112,19 @@ namespace HunterMVC
                         }
                         tmpAddresses[tmpAddresses.Length - 1] = new AddressCriteria();
                         tmpAddresses[tmpAddresses.Length - 1].Areas = new int[1];
-                        tmpAddresses[tmpAddresses.Length - 1].Areas[0] = (int)reader["areaId"];
+
+                        if (reader["areaId"] != null && (int)reader["areaId"] > 0)
+                        {
+                            tmpAddresses[tmpAddresses.Length - 1].Areas[0] = (int)reader["areaId"];
+                        }
+                        
                         tmpAddresses[tmpAddresses.Length - 1].Locations = new int[1];
-                        tmpAddresses[tmpAddresses.Length - 1].Locations[0] = (int)reader["locationId"];
+
+                        if (reader["locationId"] != null && (int)reader["locationId"] > 0)
+                        {
+                            tmpAddresses[tmpAddresses.Length - 1].Locations[0] = (int)reader["locationId"];
+                        }
+                        
                         tmpAddresses[tmpAddresses.Length - 1].City = (int)reader["cityId"];
 
                         userSearch.Addresses = tmpAddresses;
