@@ -2081,6 +2081,7 @@ namespace HunterMVC
                         for (int i = 0; i < userSearch.Addresses.Length; i++)
                         {
                             tmpAddresses[i] = new AddressCriteria();
+                            tmpAddresses[i].City = cityId;
                             if (reader["areaId"] != null && (int)reader["areaId"] > 0)
                             {
                                 tmpAddresses[i].Areas = new int[userSearch.Addresses[i].Areas.Length + 1];

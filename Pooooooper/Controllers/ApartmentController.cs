@@ -54,7 +54,7 @@ namespace HunterMVC.Controllers
         [HttpGet]
         public HttpResponseMessage SearchApartmentsBySearchIds(string searchIds)
         {
-            DateTime lastGrabDate = DateTime.Now.AddDays(-7);
+            DateTime lastGrabDate = DateTime.Now.AddDays(-10);
             List<string> searches = searchIds.Split(',').ToList<String>();
 
             List<House> result = new List<House>();
