@@ -479,9 +479,9 @@ namespace HunterMVC
             return result;
         }
 
-        internal List<UserSearch> GetUserSearchesByIds(List<string> searchIds)
+        internal UserSearch GetUserSearchById(string searchId)
         {
-            return dal.GetUserSearchesByIds(searchIds);
+            return dal.GetUserSearchById(searchId);
         }
 
         internal Dictionary<string, string> GetNeighborhoods(int cityId)

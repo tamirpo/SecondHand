@@ -1375,72 +1375,47 @@ namespace HunterMVC
             String query = String.Empty;
             foreach (AddressCriteria currentAddress in userSearch.Addresses)
             {
+                String areasTableName = GetAreasTableName(currentAddress.City);
+                String locationsTableName = GetLocationsTableName(currentAddress.City);
+
+                string inAreaArray = "-1";
                 if (currentAddress.Areas != null && currentAddress.Areas.Length > 0)
                 {
-                    string inArray = String.Empty;
+                    inAreaArray = String.Empty;    
                     foreach (int currentSearchId in currentAddress.Areas)
                     {
-                        inArray += "'" + currentSearchId + "',";
+                        inAreaArray += "'" + currentSearchId + "',";
                     }
-                    inArray = inArray.Substring(0, inArray.Length - 1);
 
-                    String areasTableName = GetAreasTableName(currentAddress.City);
-
-                    query += @"Select distinct h.*,p.*,a.name realArea 
-                            from houses h, posts p , 
-                                " + areasTableName + @" a
-                                where p.id=h.postid
-                                and a.id = h.areaId
-                                and h.id in (
-                                select  max(h.id) maxHouseId
-                                from houses h, posts p
-                                where h.postId  = p.id                          
-                                and CityId = " + currentAddress.City + @"
-                                and purposeId = @PurposeId 
-                                and h.areaId in (" + inArray + @")
-                                and (h.dateCreated between @startDate and @endDate)
-                                group by sender,h.cityId,purposeId,areaId) ";
+                    inAreaArray = inAreaArray.Substring(0, inAreaArray.Length - 1);
                 }
-                else if (currentAddress.Locations!=null && currentAddress.Locations.Length>0)
+
+                string inLocationArray = "-1";
+                if (currentAddress.Locations != null && currentAddress.Locations.Length > 0)
                 {
-                    string inArray = String.Empty;
+                    inLocationArray = String.Empty;    
                     foreach (int currentSearchId in currentAddress.Locations)
                     {
-                        inArray += "'" + currentSearchId + "',";
+                        inLocationArray += "'" + currentSearchId + "',";
                     }
-                    inArray = inArray.Substring(0, inArray.Length - 1);
-
-                    String locationsTableName = GetLocationsTableName(currentAddress.City);
-
-                    query += @"Select distinct h.*,p.*,a.name realArea 
-                            from houses h, posts p , 
-                                " + locationsTableName + @" a
-                                where p.id=h.postid
-                                and a.id = h.locationId
-                                and h.id in (
-                                select  max(h.id) maxHouseId
-                                from houses h, posts p
-                                where h.postId  = p.id 
-                                and CityId = " + currentAddress.City + @"
-                                and purposeId = @PurposeId 
-                                and h.locationId in (" + inArray + @")
-                                and (h.dateCreated between @startDate and @endDate)
-                                group by sender,h.cityId,purposeId,locationId) ";
+                    inLocationArray = inLocationArray.Substring(0, inLocationArray.Length - 1);
                 }
-                if (userSearch.FromPrice > 0)
-                {
-                    query += " and ((price between @FromPrice and @ToPrice) or price=0) ";
-                    if (!command.Parameters.Contains("@FromPrice"))
-                    {
-                        command.Parameters.Add("@FromPrice", SqlDbType.Int);
-                        command.Parameters["@FromPrice"].Value = userSearch.FromPrice;
-                    }
-                    if (!command.Parameters.Contains("@ToPrice"))
-                    {
-                        command.Parameters.Add("@ToPrice", SqlDbType.Int);
-                        command.Parameters["@ToPrice"].Value = userSearch.ToPrice;
-                    }
-                }
+
+                query += @"Select distinct h.*,p.*,
+                            (select name from " + areasTableName + @" where id=h.areaId) realArea ,                 
+                            (select name from " + locationsTableName + @" where id=h.locationId) locationName
+                        from houses h, posts p
+                            where p.id=h.postid
+                            and h.id in (
+                            select  max(h.id) maxHouseId
+                            from houses h, posts p
+                            where h.postId  = p.id                          
+                            and CityId = " + currentAddress.City + @"
+                            and purposeId = @PurposeId 
+                            and (h.areaId in (" + inAreaArray + @") or h.locationId in (" + inLocationArray + @"))
+                            and (h.dateCreated between @startDate and @endDate)
+                            group by sender,h.cityId,purposeId,areaId,locationId) ";
+
 
                 if (userSearch.FromRoomsNumber > 0)
                 {
@@ -1473,10 +1448,24 @@ namespace HunterMVC
                         command.Parameters["@ToTotalRoommatesNumber"].Value = userSearch.ToTotalRoommatesNumber;
                     }
                 }
+
+                if (userSearch.Sublet > 0)
+                {
+                    query += " and subletId = @Sublet ;";
+                    if (!command.Parameters.Contains("@Sublet"))
+                    {
+                        command.Parameters.Add("@Sublet", SqlDbType.Int);
+                        command.Parameters["@Sublet"].Value = userSearch.Sublet;
+                    }
+                }
             }
 
 
-            
+            command.Parameters.Add("@FromPrice", SqlDbType.Int);
+            command.Parameters["@FromPrice"].Value = userSearch.FromPrice;
+
+            command.Parameters.Add("@ToPrice", SqlDbType.Int);
+            command.Parameters["@ToPrice"].Value = userSearch.ToPrice;
 
             command.Parameters.Add("@PurposeId", SqlDbType.Int);
             command.Parameters["@PurposeId"].Value = userSearch.Purpose;
@@ -1486,79 +1475,6 @@ namespace HunterMVC
 
             command.Parameters.Add("@endDate", SqlDbType.DateTime);
             command.Parameters["@endDate"].Value = endDate;
-
-            /*if (userSearch.FromSize > 0)
-            {
-                query += " and ((size between @FromSize and @ToSize) or size=0) ";
-                if (!command.Parameters.Contains("@FromSize")){
-                    command.Parameters.Add("@FromSize", SqlDbType.Int);
-                    command.Parameters["@FromSize"].Value = userSearch.FromSize;
-                }
-                if (!command.Parameters.Contains("@ToSize"))
-                {
-                    command.Parameters.Add("@ToSize", SqlDbType.Int);
-                    command.Parameters["@ToSize"].Value = userSearch.ToSize;
-                }
-            }*/
-
-
-
-            /*
-            if (userSearch.Balcony > 0)
-            {
-                query += " and balconyId in (@BalconyId,0) ";
-                command.Parameters.Add("@BalconyId", SqlDbType.Int);
-                command.Parameters["@BalconyId"].Value = userSearch.Balcony;
-                if (!command.Parameters.Contains("@BalconyId"))
-                {
-                    command.Parameters.Add("@BalconyId", SqlDbType.Int);
-                    command.Parameters["@BalconyId"].Value = userSearch.ToTotalRoommatesNumber;
-                }
-            }
-            if (userSearch.Furnitured > 0)
-            {
-                query += " and FurnituredId in (@FurnituredId,0) ";
-                command.Parameters.Add("@FurnituredId", SqlDbType.Int);
-                command.Parameters["@FurnituredId"].Value = userSearch.Furnitured;
-            }
-            if (userSearch.Renovated > 0)
-            {
-                query += " and RenovatedId in (@RenovatedId,0) ";
-                command.Parameters.Add("@RenovatedId", SqlDbType.Int);
-                command.Parameters["@RenovatedId"].Value = userSearch.Renovated;
-            }
-            if (userSearch.Sublet > 0)
-            {
-                query += " and SubletId in (@SubletId,0) ";
-                command.Parameters.Add("@SubletId", SqlDbType.Int);
-                command.Parameters["@SubletId"].Value = userSearch.Sublet;
-            }
-            if (userSearch.Pets > 0)
-            {
-                query += " and PetsId in (@PetsId,0) ";
-                command.Parameters.Add("@PetsId", SqlDbType.Int);
-                command.Parameters["@PetsId"].Value = userSearch.Pets;
-            }
-            if (userSearch.Parking > 0)
-            {
-                query += " and ParkingId in (@ParkingId,0) ";
-                command.Parameters.Add("@ParkingId", SqlDbType.Int);
-                command.Parameters["@ParkingId"].Value = userSearch.Parking;
-            }
-            if (userSearch.Smoke > 0)
-            {
-                query += " and SmokeId in (@SmokeId,0) ";
-                command.Parameters.Add("@SmokeId", SqlDbType.Int);
-                command.Parameters["@SmokeId"].Value = userSearch.Smoke;
-            }
-            if (userSearch.FromAgency > 0)
-            {
-                query += " and FromAgencyId in (@FromAgencyId,0) ";
-                command.Parameters.Add("@FromAgencyId", SqlDbType.Int);
-                command.Parameters["@FromAgencyId"].Value = userSearch.FromAgency;
-            }
-             */
-
 
             command.CommandText = query;
             command.CommandType = CommandType.Text;
@@ -1571,7 +1487,15 @@ namespace HunterMVC
             while (reader.Read())
             {
                 if (lastPostId==(int)reader["postId"]){
-                    lastHouse.Areas.Add(reader["realArea"].ToString());
+                    int areaId = (int)reader["areaId"];
+                    if (areaId > 0)
+                    {
+                        lastHouse.Areas.Add(reader["realArea"].ToString());
+                    }
+                    else
+                    {
+                        lastHouse.Areas.Add(reader["locationName"].ToString());
+                    }
                 }
                 else{
 
@@ -1622,8 +1546,8 @@ namespace HunterMVC
                         int locationId = (int)reader["locationId"];
                         if (locationId > 0)
                         {
-                            house.LocationIds.Add((int)reader["areaId"]);
-                            house.Areas.Add(reader["realArea"].ToString());
+                            house.LocationIds.Add((int)reader["locationId"]);
+                            house.Areas.Add(reader["locationName"].ToString());
                         }
                     }
                     
@@ -2012,9 +1936,113 @@ namespace HunterMVC
             return result;
         }
 
+
+        internal UserSearch GetUserSearchById(string searchId)
+        {
+            UserSearch userSearch = null;
+            Dictionary<int, List<int>> cityToAreas = new Dictionary<int, List<int>>();
+            Dictionary<int, List<int>> cityToLocations = new Dictionary<int, List<int>>();
+
+            connection.Open();
+
+            // create a SqlCommand object for this connection
+            SqlCommand command = connection.CreateCommand();
+            command.CommandText = @"select distinct FromRoomsNumber, cityId,locationId,areaId, ToRoomsNumber, subletId,FromTotalRoommatesnumber, 
+                                    ToTotalRoommatesnumber, purposeId, id, FromPrice,ToPrice
+                                    from house_searches where id=@SearchId 
+                                    order by id, cityId";
+            command.CommandType = CommandType.Text;
+
+
+            command.Parameters.Add("@SearchId", SqlDbType.NVarChar);
+            command.Parameters["@SearchId"].Value = searchId;
+
+            // execute the command that returns a SqlDataReader
+            SqlDataReader reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                if (userSearch == null)
+                {
+                    userSearch = new UserSearch();
+
+                    userSearch.FromRoomsNumber = Double.Parse(reader["FromRoomsNumber"].ToString());
+                    userSearch.ToRoomsNumber = Double.Parse(reader["ToRoomsNumber"].ToString());
+                    userSearch.FromTotalRoommatesNumber = (int)reader["FromTotalRoommatesnumber"];
+                    userSearch.ToTotalRoommatesNumber = (int)reader["ToTotalRoommatesnumber"];
+                    userSearch.Purpose = (int)reader["purposeId"];
+                    userSearch.id = reader["id"].ToString();
+                    userSearch.FromPrice = (int)reader["FromPrice"];
+                    userSearch.ToPrice = (int)reader["ToPrice"];
+                    userSearch.Sublet = (int)reader["subletId"];
+                }
+                
+                int cityId = (int)reader["cityId"];
+
+                if (reader["areaId"] != null && (int)reader["areaId"] > 0)
+                {
+                    int areaId = (int)reader["areaId"];
+
+                    if (!cityToAreas.ContainsKey(cityId)){
+                        cityToAreas[cityId]  = new List<int>();
+                    }
+
+                    cityToAreas[cityId].Add(areaId);
+                }
+
+                if (reader["locationId"] != null && (int)reader["locationId"] > 0)
+                {
+                    int locationId = (int)reader["locationId"];
+
+                    if (!cityToLocations.ContainsKey(cityId)){
+                        cityToLocations[cityId]  = new List<int>();
+                    }
+
+                    cityToLocations[cityId].Add(locationId);
+                }
+            }
+
+            List<int> cities = cityToAreas.Keys.ToList();
+            foreach (int currentCityId in cityToLocations.Keys)
+	        {
+		        if (!cities.Contains(currentCityId)){
+                    cities.Add(currentCityId);
+                }
+	        }
+
+
+
+            userSearch.Addresses = new AddressCriteria[Math.Max(cityToAreas.Count,cityToLocations.Keys.Count)];
+
+            for (int i = 0; i < cities.Count; i++)
+			{
+                userSearch.Addresses[i] = new AddressCriteria();
+                userSearch.Addresses[i].City = cities[i];
+                if (cityToLocations.ContainsKey(cities[i])){
+                    userSearch.Addresses[i].Locations = cityToLocations[cities[i]].ToArray();
+                }
+
+                if (cityToAreas.ContainsKey(cities[i]))
+                {
+                    userSearch.Addresses[i].Areas = cityToAreas[cities[i]].ToArray();
+                }
+			}
+
+
+            // close the connection
+            reader.Close();
+            connection.Close();
+
+            return userSearch;
+        }
+
+        /*
         internal List<UserSearch> GetUserSearchesByIds(List<string> searchIds)
         {
             List<UserSearch> usersSearches = new List<UserSearch>();
+            Dictionary<int, int> cityToAreas = new Dictionary<int, int>();
+            Dictionary<int, int> cityToLocations = new Dictionary<int, int>(); 
+            
             connection.Open();
 
             string inArray = String.Empty;
@@ -2093,12 +2121,24 @@ namespace HunterMVC
                             }
                             else if (reader["locationId"] != null && (int)reader["locationId"] > 0)
                             {
-                                tmpAddresses[i].Locations = new int[userSearch.Addresses[i].Locations.Length + 1];
-                                for (int j = 0; j < userSearch.Addresses[i].Locations.Length; j++)
+                                if (userSearch.Addresses[i].Locations == null)
                                 {
-                                    tmpAddresses[i].Locations[j] = userSearch.Addresses[i].Locations[j];
+                                    tmpAddresses[tmpAddresses.Length - 1].Locations = new int[1];
+
+                                    if (reader["locationId"] != null && (int)reader["locationId"] > 0)
+                                    {
+                                        tmpAddresses[tmpAddresses.Length - 1].Locations[0] = (int)reader["locationId"];
+                                    }
                                 }
-                                tmpAddresses[i].Locations[tmpAddresses[i].Locations.Length - 1] = (int)reader["locationId"];
+                                else
+                                {
+                                    tmpAddresses[i].Locations = new int[userSearch.Addresses[i].Locations.Length + 1];
+                                    for (int j = 0; j < userSearch.Addresses[i].Locations.Length; j++)
+                                    {
+                                        tmpAddresses[i].Locations[j] = userSearch.Addresses[i].Locations[j];
+                                    }
+                                    tmpAddresses[i].Locations[tmpAddresses[i].Locations.Length - 1] = (int)reader["locationId"];
+                                }
                             }
                         }
 
@@ -2145,7 +2185,7 @@ namespace HunterMVC
 
             return usersSearches;
         }
-
+        */
         internal Dictionary<string, string> GetNeighborhoods(int cityId)
         {
 
@@ -2894,43 +2934,40 @@ namespace HunterMVC
                 bool firstIteration = true;
                 foreach (AddressCriteria currentAddress in searchCriteria.Addresses)
                 {
+                    string inAreaArray = "-1";
                     if (currentAddress.Areas != null && currentAddress.Areas.Length > 0)
                     {
-                        string inArray = String.Empty;
+                        inAreaArray = String.Empty;
                         foreach (int currentAddressId in currentAddress.Areas)
                         {
-                            inArray += "'" + currentAddressId + "',";
+                            inAreaArray += "'" + currentAddressId + "',";
                         }
-                        inArray = inArray.Substring(0, inArray.Length - 1);
-
-                        if (!firstIteration){
-                            command.CommandText += " union ";
-                        }
-                        command.CommandText += @"SELECT distinct id,cityId FROM house_searches where purposeId=@PurposeId
-                                and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
-                                cityid=" + currentAddress.City + @"
-                                and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
-                                and fromTotalRoommatesNumber = @FromTotalRoommatesNumber and toTotalRoommatesNumber=@ToTotalRoommatesNumber
-                                and areaId IN (" + inArray + @")";
+                        inAreaArray = inAreaArray.Substring(0, inAreaArray.Length - 1);
                     }
-                    else
+                    string inLocationArray = "-1";
+                    if (currentAddress.Locations!= null && currentAddress.Locations.Length > 0)
                     {
-                        string inArray = String.Empty;
+                        inLocationArray = String.Empty;
                         foreach (int currentAddressId in currentAddress.Locations)
                         {
-                            inArray += "'" + currentAddressId + "',";
+                            inLocationArray += "'" + currentAddressId + "',";
                         }
-                        inArray = inArray.Substring(0, inArray.Length - 1);
+                        inLocationArray = inLocationArray.Substring(0, inLocationArray.Length - 1);
+                    }
 
-                        if (!firstIteration){
+                    if (!firstIteration)
+                    {
                             command.CommandText += " union ";
-                        }
-                        command.CommandText += @"SELECT distinct id,cityId FROM house_searches where purposeId=@PurposeId
-                                and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
-                                cityid=" + currentAddress.City + @"
-                                and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
-                                and fromTotalRoommatesNumber = @FromTotalRoommatesNumber and toTotalRoommatesNumber=@ToTotalRoommatesNumber
-                                and locationId IN (" + inArray + @")";
+                    }
+
+                    command.CommandText += @"SELECT distinct id,cityId FROM house_searches where purposeId=@PurposeId
+                            and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
+                            cityid=" + currentAddress.City + @"
+                            and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
+                            and fromTotalRoommatesNumber = @FromTotalRoommatesNumber and toTotalRoommatesNumber=@ToTotalRoommatesNumber
+                            and (areaId IN (" + inAreaArray + @") or locationId in (" + inLocationArray + @")) ;";
+
+
                         /*command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
                                 and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
                                 cityid=" + currentAddress.City + @"
@@ -2944,7 +2981,6 @@ namespace HunterMVC
                                                 THEN 1 
                                                 ELSE 0 
                                             END) = " + currentAddress.Locations.Length + ")";*/
-                    }
 
                     firstIteration = false;
                 }

@@ -52,37 +52,28 @@ namespace HunterMVC.Controllers
         // GET api/<controller>/GetApartmentsForUser
         [TokenValidation]
         [HttpGet]
-        public HttpResponseMessage SearchApartmentsBySearchIds(string searchIds)
+        public HttpResponseMessage SearchApartmentsBySearchIds(string searchId)
         {
             DateTime lastGrabDate = DateTime.Now.AddDays(-10);
-            List<string> searches = searchIds.Split(',').ToList<String>();
 
             List<House> result = new List<House>();
             List<House> resultFiltered = new List<House>();
 
             HunterBL bl = new HunterBL();
 
-            List<UserSearch> userSearches = bl.GetUserSearchesByIds(searches);
-            foreach (UserSearch userSearch in userSearches)
+            UserSearch userSearch = bl.GetUserSearchById(searchId);
+            List<House> currentSeachResult = bl.GetApartments(userSearch, lastGrabDate);
+            foreach (House currentResult in currentSeachResult)
             {
-                List<House> currentSeachResult = bl.GetApartments(userSearch, lastGrabDate);
-                foreach (House currentResult in currentSeachResult)
+                if (!result.Contains(currentResult))
                 {
-                    if (!result.Contains(currentResult))
-                    {
-                        result.Add(currentResult);
-                    }
+                    result.Add(currentResult);
                 }
             }
 
             if (result.Count > 0)
             {
                 resultFiltered = result;
-                /*List<string> addresses = bl.GetAddressConclusionIdsFromUserSearches(searches);
-                foreach (string currentAddress in addresses)
-	            {
-                    resultFiltered.AddRange(result.Where(o => o.AddressesIds.Contains(currentAddress)));
-	            }*/
 
                 resultFiltered.Sort();
                 resultFiltered.Reverse();
