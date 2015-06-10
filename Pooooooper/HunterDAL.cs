@@ -1411,9 +1411,10 @@ namespace HunterMVC
                             from houses h, posts p
                             where h.postId  = p.id                          
                             and CityId = " + currentAddress.City + @"
+                            and price between @FromPrice and @ToPrice
                             and purposeId = @PurposeId 
                             and (h.areaId in (" + inAreaArray + @") or h.locationId in (" + inLocationArray + @"))
-                            and (h.dateCreated between @startDate and @endDate)
+                            and (h.dateCreated > @startDate)
                             group by sender,h.cityId,purposeId,areaId,locationId) ";
 
 
