@@ -2958,15 +2958,15 @@ namespace HunterMVC
 
                     if (!firstIteration)
                     {
-                            command.CommandText += " union ";
+                            command.CommandText += " intersect ";
                     }
 
-                    command.CommandText += @"SELECT distinct id,cityId FROM house_searches where purposeId=@PurposeId
+                    command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
                             and subletId=@SubletId and fromprice = @FromPrice and toPrice=@ToPrice and
                             cityid=" + currentAddress.City + @"
                             and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
                             and fromTotalRoommatesNumber = @FromTotalRoommatesNumber and toTotalRoommatesNumber=@ToTotalRoommatesNumber
-                            and (areaId IN (" + inAreaArray + @") or locationId in (" + inLocationArray + @")) ;";
+                            and (areaId IN (" + inAreaArray + @") or locationId in (" + inLocationArray + @")) ";
 
 
                         /*command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
@@ -2992,7 +2992,8 @@ namespace HunterMVC
                 while (reader.Read())
                 {
                     String id = reader["id"].ToString();
-                    int cityId = (int)reader["cityId"];
+                    result = id;
+                   /* int cityId = (int)reader["cityId"];
 
                     if (cityToSearchIds.ContainsKey(cityId))
                     {
@@ -3003,10 +3004,10 @@ namespace HunterMVC
                         List<String> tmpArray = new List<string>();
                         tmpArray.Add(id);
                         cityToSearchIds.Add(cityId, tmpArray);
-                    }
+                    }*/
                 }
 
-                if (cityToSearchIds.Count > 0)
+                /*if (cityToSearchIds.Count > 0)
                 {
                     foreach (String currentSearchId in cityToSearchIds.First().Value)
                     {
@@ -3025,7 +3026,7 @@ namespace HunterMVC
                             break;
                         }
                     }
-                }
+                }*/
             }
             catch (Exception ex)
             {
