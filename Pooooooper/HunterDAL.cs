@@ -1379,26 +1379,31 @@ namespace HunterMVC
                 String locationsTableName = GetLocationsTableName(currentAddress.City);
 
                 string inAreaArray = "-1";
-                if (currentAddress.Areas != null && currentAddress.Areas.Length > 0)
-                {
-                    inAreaArray = String.Empty;    
-                    foreach (int currentSearchId in currentAddress.Areas)
-                    {
-                        inAreaArray += "'" + currentSearchId + "',";
-                    }
-
-                    inAreaArray = inAreaArray.Substring(0, inAreaArray.Length - 1);
-                }
-
                 string inLocationArray = "-1";
-                if (currentAddress.Locations != null && currentAddress.Locations.Length > 0)
+
+                if (currentAddress.City == 1)
                 {
-                    inLocationArray = String.Empty;    
-                    foreach (int currentSearchId in currentAddress.Locations)
+                    if (currentAddress.Areas != null && currentAddress.Areas.Length > 0)
                     {
-                        inLocationArray += "'" + currentSearchId + "',";
+                        inAreaArray = String.Empty;
+                        foreach (int currentSearchId in currentAddress.Areas)
+                        {
+                            inAreaArray += "'" + currentSearchId + "',";
+                        }
+
+                        inAreaArray = inAreaArray.Substring(0, inAreaArray.Length - 1);
                     }
-                    inLocationArray = inLocationArray.Substring(0, inLocationArray.Length - 1);
+
+
+                    if (currentAddress.Locations != null && currentAddress.Locations.Length > 0)
+                    {
+                        inLocationArray = String.Empty;
+                        foreach (int currentSearchId in currentAddress.Locations)
+                        {
+                            inLocationArray += "'" + currentSearchId + "',";
+                        }
+                        inLocationArray = inLocationArray.Substring(0, inLocationArray.Length - 1);
+                    }
                 }
 
                 query += @"Select distinct h.*,p.*,
@@ -1412,9 +1417,13 @@ namespace HunterMVC
                             where h.postId  = p.id                          
                             and CityId = " + currentAddress.City + @"
                             and price between @FromPrice and @ToPrice
-                            and purposeId = @PurposeId 
-                            and (h.areaId in (" + inAreaArray + @") or h.locationId in (" + inLocationArray + @"))
-                            and (h.dateCreated > @startDate)
+                            and purposeId = @PurposeId ";
+
+                if (currentAddress.City==1){
+                    query += " and (h.areaId in (" + inAreaArray + @") or h.locationId in (" + inLocationArray + @")) ";
+                }
+                
+                query += @"and (h.dateCreated > @startDate)
                             group by sender,h.cityId,purposeId,areaId,locationId) ";
 
 
