@@ -80,28 +80,10 @@ function fillSummary() {
 
     var subAreas = '';
     var locations = '';
-    for (var addressesKey in house.Addresses) {
-        var currentAddress = house.Addresses[addressesKey];
-        if (currentAddress.SubAreas.length > 0) {
-            subAreas += '-- ';
-            for (var subAreaKey in currentAddress.SubAreas) {
-                var currentSubArea = currentAddress.SubAreas[subAreaKey];
-                subAreas += ', ' + currentSubArea;
-            }
+    
+    subAreas = house.AreasFound;
+    locations = house.LocationsFound;
 
-            subAreas += '<br>';
-        }
-        else if (currentAddress.Locations.length > 0) {
-            locations += '-- ';
-            for (var locationKey in currentAddress.Locations) {
-                var currentLocation = currentAddress.Locations[locationKey];
-                locations += ', ' + currentLocation;
-            }
-
-            locations += '<br>';
-        }
-
-    }
     document.getElementById("subAreaSpan").innerHTML = subAreas;
     document.getElementById("locationSpan").innerHTML = locations;
     document.getElementById("locationSpan").style.color = "#00CC00";

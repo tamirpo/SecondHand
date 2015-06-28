@@ -101,10 +101,13 @@ namespace HunterMVC
 
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
-            command.CommandText = @"Select h.*, p.*
-                                    from houses h,
-                                    (select top 1 * from posts where verified = 0 and id in (select postId from houses where cityid=@CityId) order by datecreated desc) p
-                                    where h.postId = p.id ";
+            command.CommandText = @"Select top 1 h.*, p.*
+                                    from posts p
+                                    Left join houses h
+                                    on h.postId = p.id
+                                    where verified = 0 
+                                    and h.cityId in (0,@CityId)
+                                    order by p.dateCreated desc";
 
             /*command.CommandText = @"Select h.*, p.*
                                     from houses h,
@@ -2513,69 +2516,57 @@ namespace HunterMVC
             return result;
         }
 
-        internal List<AddressConclusion> GetHouseAddressesIds(List<String> addressesIds)
+        internal List<String> GetHouseAddressesIds(int postId, int type, int cityId)
         {
-            List<AddressConclusion> result = new List<AddressConclusion>();
+            List<String> result = new List<String>();
             SqlDataReader reader = null;
 
-            foreach (String currentAddressConclusionId in addressesIds)
+            
+
+            try
             {
-                try
-                {
+                connection.Open();
+                SqlCommand command = connection.CreateCommand();
 
-                    connection.Open();
-                    SqlCommand command = connection.CreateCommand();
+                if (type==1){
 
-                    AddressConclusion addressConclusion = null;
-                    // create a SqlCommand object for this connection
-                    
-                    command.CommandText = @"select * from houseAddressConclusions where id = @Id";
-
-                    command.CommandType = CommandType.Text;
-                    command.Parameters.Add("@Id", SqlDbType.NVarChar);
-                    command.Parameters["@Id"].Value = currentAddressConclusionId;
-
-                    // execute the command that returns a SqlDataReader
-                    reader = command.ExecuteReader();
-
-                    // display the results
-                    while (reader.Read())
-                    {
-                        if (addressConclusion == null){
-                            addressConclusion = new AddressConclusion();
-                        }
-
-                        int objectType = (int)reader["objectType"];
-                        int objectId = (int)reader["objectId"];
-                        if (objectType == 1)
-                        {
-                            addressConclusion.SubAreasIds.Add(objectId);
-                        }
-                        else if (objectType == 2)
-                        {
-                            addressConclusion.LocationsIds.Add(objectId);
-                        }
-                    }
-
-                    if (addressConclusion != null)
-                    {
-                        result.Add(addressConclusion);
-                    }
+                    String areasTable = GetAreasTableName(cityId);
+                    command.CommandText = @"select name from houses h," + areasTable + @" a
+                            where h.postId = @Id and h.areaId=a.id and h.areaId>0";
                 }
-                catch (Exception ex)
-                {
+                else if (type==2){
 
+                    String locationsTable = GetLocationsTableName(cityId);
+                    command.CommandText = @"select name from houses h," + locationsTable + @" a
+                            where h.postId = @Id and h.locationId=a.id and h.locationId>0";
                 }
-                finally
-                {
-                    // close the connection
-                    if (reader != null && !reader.IsClosed)
-                    {
-                        reader.Close();
-                    }
-                    connection.Close();
 
+                command.CommandType = CommandType.Text;
+                command.Parameters.Add("@Id", SqlDbType.NVarChar);
+                command.Parameters["@Id"].Value = postId;
+
+                // execute the command that returns a SqlDataReader
+                reader = command.ExecuteReader();
+
+                // display the results
+                while (reader.Read())
+                {
+                    result.Add(reader["name"].ToString());
                 }
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                // close the connection
+                if (reader != null && !reader.IsClosed)
+                {
+                    reader.Close();
+                }
+                connection.Close();
+
             }
 
             return result;

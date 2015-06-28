@@ -123,7 +123,13 @@ namespace HunterMVC
                     returnedHouse.ExpressionsVsTypes.Add(rootExpression, "מעלית");
                 }
 
-                //returnedHouse.Addresses = dal.GetHouseAddressesIds(returnedHouse.AddressesIds);
+                List<String> areas = dal.GetHouseAddressesIds(returnedHouse.PostId, 1, returnedHouse.CityId);
+                if (areas.Count > 0)
+                    returnedHouse.AreasFound = string.Join(", ", areas);
+
+                List<String> locations = dal.GetHouseAddressesIds(returnedHouse.PostId, 2, returnedHouse.CityId);
+                if (locations.Count > 0)
+                    returnedHouse.LocationsFound = string.Join(", ", locations);
                 /*foreach (AddressConclusion currentAddress in returnedHouse.Addresses)
                 {
                     foreach (int currentLocationId in currentAddress.LocationsIds)

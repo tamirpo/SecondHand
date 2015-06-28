@@ -45,13 +45,11 @@ namespace HunterMVC.Models
         public string StreetsComment { get; set; }
         [ScriptIgnore]
         public string StreetsFound { get; set; }
-        [ScriptIgnore]
         public string LocationsFound { get; set; }
         [ScriptIgnore] 
         public string NeighborhoodsFound { get; set; }
         [ScriptIgnore] 
         public string SubAreasFound { get; set; }
-        [ScriptIgnore] 
         public string AreasFound { get; set; }
 
         public List<int> AreaIds { get; set; }
