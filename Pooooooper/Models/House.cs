@@ -147,5 +147,7 @@ namespace HunterMVC.Models
         }
 
         public string SenderPictureURL { get; set; }
+
+        public string FacebookPostURL { get; set; }
     }
 }

@@ -1547,6 +1547,7 @@ namespace HunterMVC
                     house.UserSearchId = userSearch.id;
                     house.Message = reader["text"].ToString();
                     house.SenderPictureURL = reader["senderPictureURL"].ToString();
+                    house.FacebookPostURL = reader["facebookURL"].ToString();
 
                     int areaId = (int)reader["areaId"];
                     if (areaId > 0)
