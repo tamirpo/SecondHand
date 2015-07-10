@@ -1436,12 +1436,12 @@ namespace HunterMVC
 
                     if (!command.Parameters.Contains("@FromRoomsNumber"))
                     {
-                        command.Parameters.Add("@FromRoomsNumber", SqlDbType.Int);
+                        command.Parameters.Add("@FromRoomsNumber", SqlDbType.Float);
                         command.Parameters["@FromRoomsNumber"].Value = userSearch.FromRoomsNumber;
                     }
                     if (!command.Parameters.Contains("@ToRoomsNumber"))
                     {
-                        command.Parameters.Add("@ToRoomsNumber", SqlDbType.Int);
+                        command.Parameters.Add("@ToRoomsNumber", SqlDbType.Float);
                         command.Parameters["@ToRoomsNumber"].Value = userSearch.ToRoomsNumber;
                     }
                 }
