@@ -1376,8 +1376,10 @@ namespace HunterMVC
             // create a SqlCommand object for this connection
             SqlCommand command = connection.CreateCommand();
             String query = String.Empty;
+            int i = 0;
             foreach (AddressCriteria currentAddress in userSearch.Addresses)
             {
+                i++;
                 String areasTableName = GetAreasTableName(currentAddress.City);
                 String locationsTableName = GetLocationsTableName(currentAddress.City);
 
@@ -1464,12 +1466,21 @@ namespace HunterMVC
 
                 if (userSearch.Sublet > 0)
                 {
-                    query += " and subletId = @Sublet ;";
+                    query += " and subletId = @Sublet ";
                     if (!command.Parameters.Contains("@Sublet"))
                     {
                         command.Parameters.Add("@Sublet", SqlDbType.Int);
                         command.Parameters["@Sublet"].Value = userSearch.Sublet;
                     }
+                }
+
+                if (i < userSearch.Addresses.Count())
+                {
+                    query += " union ";
+                }
+                else
+                {
+                    query += " ; ";
                 }
             }
 
