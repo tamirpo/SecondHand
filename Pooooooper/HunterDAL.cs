@@ -2967,7 +2967,26 @@ namespace HunterMVC
                             cityid=" + currentAddress.City + @"
                             and fromRoomsNumber=@FromRoomsNumber and toRoomsNumber=@ToRoomsNumber
                             and fromTotalRoommatesNumber = @FromTotalRoommatesNumber and toTotalRoommatesNumber=@ToTotalRoommatesNumber
-                            and (areaId IN (" + inAreaArray + @") or locationId in (" + inLocationArray + @")) ";
+                            and id in ( 
+                                    select id FROM house_searches
+                                    where cityId=" + currentAddress.City + @"
+                                    GROUP BY id,cityId
+                                    HAVING
+                                       Sum(CASE WHEN areaId IN (" + inAreaArray + @")
+                                                THEN 1 
+                                                ELSE 0 
+                                            END) = " + currentAddress.Areas.Length + @"
+                                       And Sum(CASE WHEN locationId IN (" + inLocationArray + @")
+                                                THEN 1 
+                                                ELSE 0 
+                                            END) = " + currentAddress.Locations.Length + @")
+                            and id in ( 
+                                    select id FROM house_searches
+                                    GROUP BY id
+                                    HAVING count(distinct cityId)=" + searchCriteria.Addresses.Count() + @")
+                            and id not in (select id from house_searches where cityId=" + currentAddress.City + @" and locationId not IN (" + inLocationArray + @",0) )                       
+                            and id not in (select id from house_searches where cityId=" + currentAddress.City + @" and areaId not IN (" + inAreaArray + @",0) ) ";
+//and (areaId IN (" + inAreaArray + @") or locationId in (" + inLocationArray + @")) ";
 
 
                         /*command.CommandText += @"SELECT distinct id FROM house_searches where purposeId=@PurposeId
